@@ -1,7 +1,7 @@
 # TagBites.Text.Markdown
 
 [![Nuget](https://img.shields.io/nuget/v/TagBites.Text.Markdown.svg)](https://www.nuget.org/packages/TagBites.Text.Markdown/)
-[![License](http://img.shields.io/github/license/TagBites/TagBites.Text.Markdown)](https://github.com/TagBites/TagBites.Text.Markdown/blob/master/LICENSE)
+[![License](https://img.shields.io/github/license/TagBites/TagBites.Text.Markdown)](https://github.com/TagBites/TagBites.Text.Markdown/blob/master/LICENSE)
 
 C# library for programmatically building Markdown documents. Easily add headers, tables, checklists, and more with a simple, object-oriented API.
 
