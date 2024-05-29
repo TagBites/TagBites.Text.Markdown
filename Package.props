@@ -1,0 +1,17 @@
+<Project>
+  <PropertyGroup>
+    <Description>C# library for programmatically building Markdown documents.</Description>
+    <PackageTags>markdown; markdown builder; markdown syntax</PackageTags>
+
+    <PackageProjectUrl>https://github.com/TagBites/TagBites.Text.Markdown</PackageProjectUrl>
+    <PackageIconUrl></PackageIconUrl>
+
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/TagBites/TagBites.Text.Markdown.git</RepositoryUrl>
+
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
+</Project>
