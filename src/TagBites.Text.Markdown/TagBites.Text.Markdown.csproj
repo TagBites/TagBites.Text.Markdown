@@ -2,20 +2,22 @@
 
   <!-- Targets -->
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0</TargetFrameworks>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>TagBites</RootNamespace>
   </PropertyGroup>
 
   <!-- Build -->
   <PropertyGroup>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <!-- TODO: document the public API and drop this -->
+    <NoWarn>$(NoWarn);1591</NoWarn>
   </PropertyGroup>
 
-  <!-- README -->
-  <ItemGroup>
-    <None Include="..\..\README.md">
-      <Pack>True</Pack>
-      <PackagePath>\</PackagePath>
-    </None>
-  </ItemGroup>
+  <!-- Package info -->
+  <PropertyGroup>
+    <Description>Builds Markdown documents from a typed element tree. Renders headers, tables, lists, checklists, quotes and code blocks as Markdig-compatible Markdown or as plain text.</Description>
+    <PackageTags>markdown; markdig; commonmark; gfm; builder; generator; documentation</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+  </PropertyGroup>
 
 </Project>
