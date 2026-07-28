@@ -1,0 +1,189 @@
+@page "/"
+@implements IDisposable
+@inject MarkdownCodeGenerator Generator
+@inject MarkdownCompiler Compiler
+@inject IJSRuntime JS
+
+<PageTitle>TagBites.Text.Markdown - Markdown and C# builder code side by side</PageTitle>
+
+<div class="container">
+    <div class="tabs" role="tablist">
+        <button type="button" role="tab" class="@(_activeTab == Tab.Code ? "active" : null)"
+                @onclick="() => _activeTab = Tab.Code">C# code</button>
+        <button type="button" role="tab" class="@(_activeTab == Tab.Markdown ? "active" : null)"
+                @onclick="() => _activeTab = Tab.Markdown">Markdown</button>
+    </div>
+</div>
+
+<div class="container panes">
+
+    <section class="@(_activeTab == Tab.Code ? null : "inactive")">
+        <label for="code">
+            C# code
+            @if (_errors.Count > 0)
+            {
+                <span class="badge warn">does not compile</span>
+            }
+            else if (_busy)
+            {
+                <span class="badge">working</span>
+            }
+        </label>
+        <div class="editor @(_errors.Count > 0 ? "invalid" : null)">
+            <pre aria-hidden="true"><code class="language-csharp"></code></pre>
+            <textarea id="code" rows="24" spellcheck="false" value="@_code" @oninput="OnCodeInput"></textarea>
+        </div>
+
+        @if (_errors.Count > 0)
+        {
+            <ul class="messages">
+                @foreach (var error in _errors.Take(6))
+                {
+                    <li>@error</li>
+                }
+            </ul>
+        }
+    </section>
+
+    <section class="@(_activeTab == Tab.Markdown ? null : "inactive")">
+        <label for="markdown">Markdown</label>
+        <div class="editor">
+            <pre aria-hidden="true"><code class="language-markdown"></code></pre>
+            <textarea id="markdown" rows="24" spellcheck="false" value="@_markdown" @oninput="OnMarkdownInput"></textarea>
+        </div>
+
+        @if (_warnings.Count > 0)
+        {
+            <ul class="messages">
+                @foreach (var warning in _warnings.Distinct().Take(6))
+                {
+                    <li>@warning</li>
+                }
+            </ul>
+        }
+    </section>
+
+</div>
+
+@code {
+    private const int DelayMilliseconds = 600;
+
+    private const string Sample = """
+        # TagBites.Expressions
+
+        A **Roslyn-based** C# expression parser that compiles a runtime string into a typed delegate, without a new assembly.
+
+        ## Options
+
+        | Option          | Purpose                      | Kind |
+        | :-------------- | :--------------------------: | ---: |
+        | `Parameters`    | names the inputs             | list |
+        | `GlobalMembers` | exposes values and delegates | map  |
+
+        - real C# syntax
+          - operators, precedence, numeric promotion
+          - pattern matching, tuples, lambdas, LINQ
+        - [x] compiles to `Func<>`
+        - [ ] emits a new assembly
+
+        > If C# accepts the expression, the parser accepts it.
+
+        ---
+
+        See the [demo](https://tagbites.com/expressions/demo) to evaluate an expression in the browser.
+        """;
+
+    private enum Tab
+    {
+        Code,
+        Markdown
+    }
+
+    private CancellationTokenSource? _pending;
+    private IReadOnlyList<string> _errors = [];
+    private IReadOnlyList<string> _warnings = [];
+    private string _code = string.Empty;
+    private string _markdown = Sample;
+    private Tab _activeTab = Tab.Markdown;
+    private bool _busy;
+
+    protected override void OnInitialized() => GenerateFromMarkdown(Sample);
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JS.InvokeVoidAsync("markdownDemo.attach", "code");
+            await JS.InvokeVoidAsync("markdownDemo.attach", "markdown");
+            return;
+        }
+
+        // The value can change from the other pane, and the highlight has to follow
+        await JS.InvokeVoidAsync("markdownDemo.refresh", "code");
+        await JS.InvokeVoidAsync("markdownDemo.refresh", "markdown");
+    }
+
+    private void OnMarkdownInput(ChangeEventArgs e)
+    {
+        _markdown = e.Value?.ToString() ?? string.Empty;
+        Schedule(() =>
+        {
+            GenerateFromMarkdown(_markdown);
+            return Task.CompletedTask;
+        });
+    }
+    private void OnCodeInput(ChangeEventArgs e)
+    {
+        _code = e.Value?.ToString() ?? string.Empty;
+        Schedule(() => BuildFromCodeAsync(_code));
+    }
+
+    private void Schedule(Func<Task> work)
+    {
+        _pending?.Cancel();
+        _pending = new CancellationTokenSource();
+
+        var token = _pending.Token;
+        _busy = true;
+
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                await Task.Delay(DelayMilliseconds, token);
+                await work();
+            }
+            catch (OperationCanceledException)
+            {
+                return;
+            }
+
+            if (token.IsCancellationRequested)
+                return;
+
+            _busy = false;
+            await InvokeAsync(StateHasChanged);
+        });
+    }
+
+    private void GenerateFromMarkdown(string markdown)
+    {
+        var result = Generator.Generate(markdown);
+
+        _code = result.Code;
+        _warnings = result.Warnings;
+        _errors = [];
+    }
+    private async Task BuildFromCodeAsync(string code)
+    {
+        var result = await Compiler.CompileAsync(code);
+
+        _errors = result.Errors;
+        _warnings = [];
+
+        if (result.Document != null)
+            _markdown = result.Document.ToString();
+    }
+
+    public void Dispose() => _pending?.Cancel();
+}

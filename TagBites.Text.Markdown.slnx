@@ -6,6 +6,7 @@
   </Configurations>
   <Folder Name="/.github/">
     <File Path=".github/workflows/build-and-test.yml" />
+    <File Path=".github/workflows/deploy-demo.yml" />
     <File Path=".github/workflows/publish-preview.yml" />
     <File Path=".github/workflows/publish.yml" />
   </Folder>
@@ -17,6 +18,9 @@
     <File Path="global.json" />
     <File Path="LICENSE" />
     <File Path="README.md" />
+  </Folder>
+  <Folder Name="/samples/">
+    <Project Path="samples/TagBites.Text.Markdown.Demo/TagBites.Text.Markdown.Demo.csproj" />
   </Folder>
   <Project Path="src/TagBites.Text.Markdown/TagBites.Text.Markdown.csproj" />
   <Project Path="tests/TagBites.Text.Markdown.Tests/TagBites.Text.Markdown.Tests.csproj" />

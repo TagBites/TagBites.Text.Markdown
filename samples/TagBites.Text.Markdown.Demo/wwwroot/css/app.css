@@ -1,0 +1,263 @@
+/* Brand palette from the site theme, because an iframe does not inherit its variables */
+:root {
+    --tb-accent-low: #e8f0f9;
+    --tb-accent: #146dd6;
+    --tb-accent-high: #0f54a5;
+    --tb-accent-text: #ffffff;
+    --tb-warn-background: #fdf0d5;
+    --tb-warn-text: #4a3609;
+    --tb-error: #b3261e;
+    --tb-error-background: #fdecea;
+
+    --pico-font-size: 95%;
+}
+
+/* Pico declares its palette on :root:not([data-theme=dark]), which outranks a plain :root */
+:root:root {
+    --pico-primary: var(--tb-accent);
+    --pico-primary-background: var(--tb-accent);
+    --pico-primary-hover-background: var(--tb-accent-high);
+    --pico-primary-border: var(--tb-accent);
+    --pico-primary-inverse: var(--tb-accent-text);
+    --pico-primary-focus: var(--tb-accent-low);
+}
+
+[data-theme="dark"] {
+    --tb-accent-low: #0f172a;
+    --tb-accent: #3392ff;
+    --tb-accent-high: #b3d6ff;
+    --tb-accent-text: #0f172a;
+    --tb-warn-background: #3d2f0d;
+    --tb-warn-text: #f7e6c0;
+    --tb-error: #f2b8b5;
+    --tb-error-background: #3b1513;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+        --tb-accent-low: #0f172a;
+        --tb-accent: #3392ff;
+        --tb-accent-high: #b3d6ff;
+        --tb-accent-text: #0f172a;
+        --tb-warn-background: #3d2f0d;
+        --tb-warn-text: #f7e6c0;
+        --tb-error: #f2b8b5;
+        --tb-error-background: #3b1513;
+    }
+}
+
+#page-header {
+    padding-block: 1.5rem 0.5rem;
+}
+
+.titlebar {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.5em;
+}
+
+.titlebar h1 {
+    margin: 0;
+    font-size: 1.6rem;
+}
+
+.panes {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    align-items: start;
+}
+
+@media (min-width: 900px) {
+    .panes {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+.panes section {
+    min-width: 0;
+    margin: 0;
+}
+
+.panes label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+}
+
+/* A highlighted pre sits under a transparent textarea, so both have to line up exactly */
+.editor {
+    position: relative;
+    height: 30rem;
+    border: 1px solid var(--pico-form-element-border-color);
+    border-radius: var(--pico-border-radius);
+    background: var(--pico-form-element-background-color);
+    overflow: hidden;
+}
+
+.editor pre,
+.editor textarea {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0.7rem;
+    border: 0;
+    border-radius: 0;
+    background: none;
+    font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+    font-size: 0.8rem;
+    line-height: 1.45;
+    letter-spacing: normal;
+    tab-size: 4;
+    white-space: pre;
+    overflow: auto;
+}
+
+.editor pre {
+    pointer-events: none;
+}
+
+.editor pre code {
+    display: block;
+    font: inherit;
+    padding: 0;
+    background: none;
+    white-space: pre;
+    text-shadow: none;
+}
+
+.editor textarea {
+    color: transparent;
+    caret-color: var(--pico-color);
+    resize: none;
+    box-shadow: none;
+}
+
+.editor textarea:focus {
+    box-shadow: none;
+}
+
+/* Tabs replace the stacked layout on a narrow screen */
+.tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+}
+
+/* Pico redefines --pico-color inside a button, so the inactive tab states its own colour */
+.tabs button {
+    width: auto;
+    margin: 0;
+    padding: 0.25rem 0.9rem;
+    font-size: 0.85rem;
+    background: none;
+    border-color: var(--tb-accent);
+    color: var(--tb-accent);
+}
+
+.tabs button.active {
+    background: var(--tb-accent);
+    border-color: var(--tb-accent);
+    color: var(--tb-accent-text);
+}
+
+@media (min-width: 900px) {
+    .tabs {
+        display: none;
+    }
+}
+
+@media (max-width: 899.98px) {
+    .panes section.inactive {
+        display: none;
+    }
+}
+
+.badge {
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 0.1rem 0.5rem;
+    border-radius: 1rem;
+}
+
+.badge {
+    background: var(--tb-accent-low);
+    color: var(--tb-accent-high);
+}
+
+.badge.warn {
+    background: var(--tb-warn-background);
+    color: var(--tb-warn-text);
+}
+
+.editor.invalid {
+    border-color: var(--tb-error);
+    box-shadow: 0 0 0 2px var(--tb-error-background);
+}
+
+.messages {
+    margin: 0.5rem 0 0;
+    font-size: 0.8rem;
+    color: var(--tb-error);
+}
+
+/* Embedded mode */
+
+html.embed {
+    overflow-y: auto;
+}
+
+html.embed #page-header {
+    display: none;
+}
+
+html.embed main.container,
+html.embed #app-loading .container {
+    max-width: none;
+    padding: 0;
+    margin: 0;
+}
+
+html.embed .editor {
+    height: 24rem;
+}
+
+#blazor-error-ui {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 0.6rem 1.25rem;
+    background: var(--tb-error-background);
+    color: var(--tb-error);
+    z-index: 1000;
+}
+
+.loading-screen {
+    display: flex;
+    justify-content: center;
+    padding-block: 3rem;
+}
+
+.spinner {
+    display: inline-block;
+    width: 1rem;
+    height: 1rem;
+    margin-right: 0.5rem;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    vertical-align: -2px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>TagBites.Text.Markdown - Markdown to C# builder code</title>
+    <meta name="description" content="Paste Markdown and get the C# code that rebuilds it with TagBites.Text.Markdown, an open-source Markdown builder library for .NET. Runs entirely in the browser." />
+    <link rel="canonical" href="https://tagbites.github.io/TagBites.Text.Markdown/" />
+    <meta name="robots" content="index, follow" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="TagBites.Text.Markdown" />
+    <meta property="og:title" content="TagBites.Text.Markdown - Markdown to C# builder code" />
+    <meta property="og:description" content="Paste Markdown and get the C# code that rebuilds it with TagBites.Text.Markdown. Runs entirely in the browser." />
+    <meta property="og:url" content="https://tagbites.github.io/TagBites.Text.Markdown/" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="TagBites.Text.Markdown - Markdown to C# builder code" />
+    <meta name="twitter:description" content="Open-source Markdown builder for .NET - convert Markdown into builder code in this interactive demo." />
+
+    <base href="/" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism.min.css" />
+    <link href="css/app.css" rel="stylesheet" />
+
+    <script>
+        (function () {
+            var query = new URLSearchParams(location.search);
+
+            var embed = query.get('embed');
+            if (embed !== null && embed !== '0' && embed !== 'false')
+                document.documentElement.classList.add('embed');
+
+            // An iframe follows the operating system, so the host page passes its own theme
+            var theme = query.get('theme');
+            if (theme === 'dark' || theme === 'light')
+                document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
+</head>
+<body>
+<header id="page-header" class="container">
+    <div class="titlebar">
+        <h1>TagBites.Text.Markdown</h1>
+        <a class="repo" href="https://github.com/TagBites/TagBites.Text.Markdown" target="_blank" rel="noopener">GitHub</a>
+    </div>
+    <p>
+        Edit either side. Markdown is parsed with Markdig and converted into the C# code that rebuilds it,
+        and the code is compiled and run to produce the Markdown. The snippet has to leave the result in a
+        variable named <code>document</code>. Everything runs client-side.
+    </p>
+</header>
+
+<div id="app"></div>
+
+<div id="app-loading">
+    <main class="container loading-screen">
+        <div class="loading-status" role="status" aria-live="polite">
+            <span class="spinner" aria-hidden="true"></span>
+            <span>Loading the converter&hellip;</span>
+        </div>
+    </main>
+</div>
+
+<div id="blazor-error-ui">
+    An unhandled error has occurred.
+    <a href="" class="reload">Reload</a>
+    <a class="dismiss">🗙</a>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-clike.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-csharp.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-markup.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-markdown.min.js"></script>
+<script src="js/editor.js"></script>
+<script src="_framework/blazor.webassembly.js" autostart="false"></script>
+<script>
+    Blazor.start().then(function () {
+        var loading = document.getElementById('app-loading');
+        var app = document.getElementById('app');
+        if (!loading)
+            return;
+
+        if (app && app.childElementCount > 0) {
+            loading.remove();
+            return;
+        }
+
+        var obs = new MutationObserver(function () {
+            if (app.childElementCount > 0) {
+                obs.disconnect();
+                loading.remove();
+            }
+        });
+        obs.observe(app, { childList: true });
+    });
+</script>
+<script>
+    // Autosize for embedded mode
+    (function () {
+        if (!document.documentElement.classList.contains('embed'))
+            return;
+
+        var last = 0;
+        var send = function () {
+            var height = Math.ceil(document.body.getBoundingClientRect().height);
+            if (height === last)
+                return;
+
+            last = height;
+            parent.postMessage({ type: 'tagbites:demo-height', height: height }, '*');
+        };
+
+        send();
+        addEventListener('load', send);
+
+        if (window.ResizeObserver)
+            new ResizeObserver(send).observe(document.body);
+
+        setInterval(send, 500);
+    })();
+</script>
+</body>
+</html>
