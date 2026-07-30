@@ -3,13 +3,28 @@ using System.Text;
 
 namespace TagBites.Text.Markdown;
 
+/// <summary>
+/// The metadata of a document, written above the content as a YAML front matter block.
+/// </summary>
+/// <remarks>
+/// <see cref="Title"/> and <see cref="Description"/> map to the entry named after them in lower case.
+/// The indexer holds an entry with a single value, and <see cref="SetValues"/> holds one with a list,
+/// which is the shape a generator expects for <c>tags</c> or <c>keywords</c>.
+/// The block writes its entries in the order in which they were first set.
+/// </remarks>
 public class MarkdownFrontMatter : IEnumerable<KeyValuePair<string, string>>
 {
     private const string Indicators = "-?:,[]{}#&*!|>'\"%@`";
 
     private readonly List<Entry> _entries = [];
 
+    /// <summary>
+    /// Gets or sets the title of the document.
+    /// </summary>
     public string? Title { get => this["title"]; set => this["title"] = value; }
+    /// <summary>
+    /// Gets or sets the short description of the document.
+    /// </summary>
     public string? Description { get => this["description"]; set => this["description"] = value; }
 
     internal bool IsEmpty
@@ -24,6 +39,10 @@ public class MarkdownFrontMatter : IEnumerable<KeyValuePair<string, string>>
         }
     }
 
+    /// <summary>
+    /// Gets or sets the single value of the entry with the given name. Setting <c>null</c> removes the entry.
+    /// </summary>
+    /// <remarks>An entry that holds a list reads as <c>null</c> here. Use <see cref="GetValues"/> for it.</remarks>
     public string? this[string name]
     {
         get
@@ -57,7 +76,14 @@ public class MarkdownFrontMatter : IEnumerable<KeyValuePair<string, string>>
         }
     }
 
+    /// <summary>
+    /// Creates a block without entries.
+    /// </summary>
     public MarkdownFrontMatter() { }
+    /// <summary>
+    /// Creates a block from entries that were read from an existing document.
+    /// </summary>
+    /// <remarks>A name that repeats builds a list, so the entries of another block come back unchanged.</remarks>
     public MarkdownFrontMatter(IEnumerable<KeyValuePair<string, string>> entries)
     {
         if (entries == null)
@@ -68,6 +94,10 @@ public class MarkdownFrontMatter : IEnumerable<KeyValuePair<string, string>>
     }
 
 
+    /// <summary>
+    /// Returns the values of the entry with the given name, or <c>null</c> when it holds no list.
+    /// </summary>
+    /// <remarks>An entry with a single value reads through the indexer.</remarks>
     public IReadOnlyList<string>? GetValues(string name)
     {
         ValidateName(name);
@@ -75,6 +105,10 @@ public class MarkdownFrontMatter : IEnumerable<KeyValuePair<string, string>>
         var index = IndexOf(name);
         return index < 0 ? null : _entries[index].Values;
     }
+    /// <summary>
+    /// Replaces the entry with the given name with a list, which is written as <c>[first, second]</c>.
+    /// </summary>
+    /// <remarks>An empty list writes nothing, and <c>null</c> removes the entry.</remarks>
     public MarkdownFrontMatter SetValues(string name, params string[] values)
     {
         ValidateName(name);
@@ -102,6 +136,10 @@ public class MarkdownFrontMatter : IEnumerable<KeyValuePair<string, string>>
         return this;
     }
 
+    /// <summary>
+    /// Returns every value of the block, one pair per value.
+    /// </summary>
+    /// <remarks>An entry that holds a list comes back once per item, under the same name.</remarks>
     public IEnumerator<KeyValuePair<string, string>> GetEnumerator()
     {
         foreach (var entry in _entries)

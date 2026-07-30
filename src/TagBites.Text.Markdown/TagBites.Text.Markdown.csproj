@@ -9,8 +9,6 @@
   <!-- Build -->
   <PropertyGroup>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <!-- TODO: document the public API and drop this -->
-    <NoWarn>$(NoWarn);1591</NoWarn>
   </PropertyGroup>
 
   <!-- Package info -->

@@ -1,10 +1,20 @@
 namespace TagBites.Text.Markdown;
 
+/// <summary>
+/// A header, written with the <c>#</c> marker.
+/// </summary>
+/// <remarks>
+/// Markdown has no header below level six.
+/// A deeper one becomes bold text followed by a hard line break, which reads as a header in every renderer.
+/// </remarks>
 public class MarkdownHeader : MarkdownElement
 {
     internal const int MinimumLevel = 1;
     internal const int MaximumLevel = 6;
 
+    /// <summary>
+    /// Gets or sets the level of the header, or <c>null</c> when it follows the section nesting.
+    /// </summary>
     public int? Level
     {
         get;
@@ -16,8 +26,18 @@ public class MarkdownHeader : MarkdownElement
             field = value;
         }
     }
+    /// <summary>
+    /// Gets or sets the text of the header.
+    /// </summary>
     public MarkdownText Text { get; set; }
 
+    /// <summary>
+    /// Gets or sets the explicit anchor of the header.
+    /// </summary>
+    /// <remarks>
+    /// <see cref="MarkdownFormat.HeaderAnchorStyle"/> decides how the anchor is written.
+    /// The property drops a leading <c>#</c>.
+    /// </remarks>
     public string? CustomId
     {
         get;
@@ -28,7 +48,13 @@ public class MarkdownHeader : MarkdownElement
         }
     }
 
+    /// <summary>
+    /// Creates a header whose level follows the section nesting.
+    /// </summary>
     public MarkdownHeader(MarkdownText text) => Text = text;
+    /// <summary>
+    /// Creates a header with an explicit level, between one and six.
+    /// </summary>
     public MarkdownHeader(int level, MarkdownText text)
     {
         Level = level;
@@ -36,12 +62,14 @@ public class MarkdownHeader : MarkdownElement
     }
 
 
+    /// <inheritdoc cref="CustomId"/>
     public MarkdownHeader SetCustomId(string customId)
     {
         CustomId = customId;
         return this;
     }
 
+    /// <inheritdoc />
     protected internal override void Resolve(MarkdownStringBuilder builder)
     {
         Write(builder, Level ?? builder.SectionLevel + 1, Text, CustomId);

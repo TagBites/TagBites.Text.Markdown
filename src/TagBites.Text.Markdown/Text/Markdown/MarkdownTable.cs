@@ -1,17 +1,40 @@
 namespace TagBites.Text.Markdown;
 
+/// <summary>
+/// A table with a header row, written with the <c>|</c> marker.
+/// </summary>
+/// <remarks>
+/// The table comes from the GitHub Flavored Markdown tables extension, where a cell holds inline content only.
+/// A cell escapes <c>|</c> and writes a line break as a space.
+/// The table pads every column to an equal width.
+/// </remarks>
 public class MarkdownTable : MarkdownElement
 {
+    /// <summary>
+    /// Gets the header of each column, which also sets the number of columns.
+    /// </summary>
     public IList<MarkdownText> Headers { get; } = new List<MarkdownText>();
+    /// <summary>
+    /// Gets the rows of the table, each holding the cells of one row.
+    /// </summary>
     public IList<IList<MarkdownText>> Rows { get; } = new List<IList<MarkdownText>>();
+    /// <summary>
+    /// Gets the alignment of each column. A column without an entry uses <see cref="MarkdownTableColumnAlignment.None"/>.
+    /// </summary>
     public IList<MarkdownTableColumnAlignment> Alignments { get; } = new List<MarkdownTableColumnAlignment>();
 
 
+    /// <summary>
+    /// Appends a single column header.
+    /// </summary>
     public MarkdownTable WithHeader(MarkdownText text)
     {
         Headers.Add(text);
         return this;
     }
+    /// <summary>
+    /// Appends a single column header with the given alignment.
+    /// </summary>
     public MarkdownTable WithHeader(MarkdownText text, MarkdownTableColumnAlignment alignment)
     {
         Headers.Add(text);
@@ -22,6 +45,10 @@ public class MarkdownTable : MarkdownElement
         Alignments.Add(alignment);
         return this;
     }
+    /// <summary>
+    /// Replaces all column headers with <paramref name="columns"/>.
+    /// </summary>
+    /// <remarks>To append a single header, use <see cref="WithHeader(MarkdownText)"/>.</remarks>
     public MarkdownTable SetHeaders(params MarkdownText[] columns)
     {
         if (columns == null)
@@ -34,6 +61,7 @@ public class MarkdownTable : MarkdownElement
 
         return this;
     }
+    /// <inheritdoc cref="SetHeaders(MarkdownText[])"/>
     public MarkdownTable SetHeaders(params string[] columns)
     {
         if (columns == null)
@@ -46,6 +74,9 @@ public class MarkdownTable : MarkdownElement
 
         return this;
     }
+    /// <summary>
+    /// Replaces the alignment of all columns with <paramref name="alignments"/>.
+    /// </summary>
     public MarkdownTable SetAlignments(params MarkdownTableColumnAlignment[] alignments)
     {
         if (alignments == null)
@@ -59,6 +90,9 @@ public class MarkdownTable : MarkdownElement
         return this;
     }
 
+    /// <summary>
+    /// Appends a row built from the given cells.
+    /// </summary>
     public MarkdownTable WithRow(params MarkdownText[] textCells)
     {
         if (textCells == null)
@@ -67,6 +101,7 @@ public class MarkdownTable : MarkdownElement
         Rows.Add(textCells);
         return this;
     }
+    /// <inheritdoc cref="WithRow(MarkdownText[])"/>
     public MarkdownTable WithRow(params string[] textCells)
     {
         if (textCells == null)
@@ -74,6 +109,7 @@ public class MarkdownTable : MarkdownElement
 
         return WithRow((IList<string>)textCells);
     }
+    /// <inheritdoc cref="WithRow(MarkdownText[])"/>
     public MarkdownTable WithRow(IList<MarkdownText> textCells)
     {
         if (textCells == null)
@@ -82,6 +118,7 @@ public class MarkdownTable : MarkdownElement
         Rows.Add(textCells);
         return this;
     }
+    /// <inheritdoc cref="WithRow(MarkdownText[])"/>
     public MarkdownTable WithRow(IList<string> textCells)
     {
         if (textCells == null)
@@ -96,6 +133,7 @@ public class MarkdownTable : MarkdownElement
         return this;
     }
 
+    /// <inheritdoc />
     protected internal override void Resolve(MarkdownStringBuilder builder)
     {
         if (builder.Format.IsPlainText)
