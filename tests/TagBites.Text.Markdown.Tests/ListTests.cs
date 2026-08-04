@@ -33,6 +33,22 @@ public class ListTests : MarkdownTestBase
     }
 
     [Fact]
+    public void OrderedListStartsWhereItIsTold()
+    {
+        var list = new MarkdownList { IsOrdered = true, StartNumber = 8 }
+            .WithItem("a")
+            .WithItem("b")
+            .WithItem("c");
+
+        var expected = Lines(
+            "8. a",
+            "9. b",
+            "10. c");
+
+        AssertMarkdown(expected, list);
+    }
+
+    [Fact]
     public void CheckList()
     {
         var list = new MarkdownList()

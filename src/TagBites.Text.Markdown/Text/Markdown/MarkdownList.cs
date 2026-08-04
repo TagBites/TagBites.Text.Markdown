@@ -6,10 +6,29 @@ namespace TagBites.Text.Markdown;
 public class MarkdownList : MarkdownElement
 {
     /// <summary>
-    /// Gets or sets a value indicating whether the items are numbered from one.
+    /// Gets or sets a value indicating whether the items are numbered.
     /// </summary>
     /// <remarks>Default: <c>false</c>, which writes the <c>-</c> marker.</remarks>
     public bool IsOrdered { get; set; }
+    /// <summary>
+    /// Gets or sets the number the first item carries.
+    /// </summary>
+    /// <remarks>
+    /// Applies only when <see cref="IsOrdered"/> is <c>true</c>, and continues a list that another block
+    /// interrupted. Default: <c>1</c>.
+    /// </remarks>
+    /// <exception cref="ArgumentOutOfRangeException">The value is negative.</exception>
+    public int StartNumber
+    {
+        get;
+        set
+        {
+            if (value < 0)
+                throw new ArgumentOutOfRangeException(nameof(value));
+
+            field = value;
+        }
+    } = 1;
 
     /// <summary>
     /// Gets the items of the list.
@@ -42,11 +61,11 @@ public class MarkdownList : MarkdownElement
     {
         var format = builder.Format;
         var separate = format.SeparateLooseListItems && !format.IsPlainText && IsLoose(format);
-        var number = 0;
+        var index = 0;
 
         foreach (var item in format.GetVisible(Items))
         {
-            if (number > 0)
+            if (index > 0)
             {
                 builder.AppendLine();
 
@@ -54,11 +73,11 @@ public class MarkdownList : MarkdownElement
                     builder.AppendLine();
             }
 
-            number++;
-
             var marker = IsOrdered
-                ? number.ToString() + ". "
+                ? (StartNumber + index).ToString() + ". "
                 : format.IsPlainText ? string.Empty : "- ";
+
+            index++;
 
             builder.Append(marker);
 
