@@ -41,7 +41,36 @@ public class SyntaxTests : MarkdownTestBase
     [Theory]
     [InlineData("logo", "logo.png", "![logo](logo.png)")]
     [InlineData("a *b*", "x.png", "![a \\*b\\*](x.png)")]
+    [InlineData("logo", "a logo.png", "![logo](a%20logo.png)")]
     public void Image(string name, string address, string expected) => Assert.Equal(expected, MarkdownText.Image(name, address).Markdown);
+
+    [Theory]
+    [InlineData("a b.md", "a%20b.md")]
+    [InlineData("a\tb.md", "a%09b.md")]
+    [InlineData("a\nb.md", "a%0Ab.md")]
+    [InlineData("a\rb.md", "a%0Db.md")]
+    // The spec forbids every ASCII control character, not only the three that end a line
+    [InlineData("a\u0001b.md", "a%01b.md")]
+    [InlineData("a\u001Fb.md", "a%1Fb.md")]
+    [InlineData("a\u007Fb.md", "a%7Fb.md")]
+    [InlineData("a\u0080b.md", "a%C2%80b.md")]
+    [InlineData("a\u009Fb.md", "a%C2%9Fb.md")]
+    // A parenthesis is allowed backslash-escaped, which keeps it readable in the address
+    [InlineData("x(.md", "x\\(.md")]
+    [InlineData("x).md", "x\\).md")]
+    [InlineData("x(a(b).md", "x\\(a\\(b\\).md")]
+    [InlineData("Foo_(bar).md", "Foo_(bar).md")]
+    [InlineData("x((1)).md", "x((1)).md")]
+    [InlineData("a&b<c>d\"e.md", "a&b<c>d\"e.md")]
+    [InlineData("already%20encoded.md", "already%20encoded.md")]
+    // A letter outside the C1 range needs no encoding, so the address stays readable
+    [InlineData("zażółć-gęślą.md", "zażółć-gęślą.md")]
+    [InlineData("docs/中文.md", "docs/中文.md")]
+    [InlineData("café.md", "café.md")]
+    public void AddressKeepsTheLinkParsable(string address, string expected)
+    {
+        Assert.Equal($"[name]({expected})", MarkdownText.Link("name", address).Markdown);
+    }
 
     [Theory]
     [InlineData("")]

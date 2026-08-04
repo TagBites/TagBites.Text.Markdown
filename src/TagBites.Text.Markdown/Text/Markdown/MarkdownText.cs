@@ -1,3 +1,5 @@
+using System.Text;
+
 namespace TagBites.Text.Markdown;
 
 /// <summary>
@@ -111,13 +113,15 @@ public readonly struct MarkdownText : IEquatable<MarkdownText>
     /// <summary>
     /// Builds a link to <paramref name="address"/>.
     /// </summary>
-    /// <remarks>The display text is escaped, the address is not.</remarks>
+    /// <remarks>
+    /// The display and the address are escaped if needed.
+    /// </remarks>
     public static MarkdownText Link(MarkdownText name, string address)
     {
         if (string.IsNullOrEmpty(address))
             throw new ArgumentException("Address can not be null or empty.", nameof(address));
 
-        return new MarkdownText("[" + name.Markdown + "](" + address + ")", name.Text);
+        return new MarkdownText("[" + name.Markdown + "](" + EncodeAddress(address) + ")", name.Text);
     }
     /// <summary>
     /// Builds an image held at <paramref name="address"/>.
@@ -128,9 +132,67 @@ public readonly struct MarkdownText : IEquatable<MarkdownText>
         if (string.IsNullOrEmpty(address))
             throw new ArgumentException("Address can not be null or empty.", nameof(address));
 
-        return new MarkdownText("![" + name.Markdown + "](" + address + ")", name.Text);
+        return new MarkdownText("![" + name.Markdown + "](" + EncodeAddress(address) + ")", name.Text);
     }
 
+    private static string EncodeAddress(string address)
+    {
+        var encodeParentheses = !HasBalancedParentheses(address);
+        StringBuilder? builder = null;
+
+        for (var i = 0; i < address.Length; i++)
+        {
+            var replacement = GetAddressReplacement(address[i], encodeParentheses);
+
+            if (replacement == null)
+            {
+                builder?.Append(address[i]);
+                continue;
+            }
+
+            if (builder == null)
+            {
+                builder = new StringBuilder(address.Length + 8);
+                builder.Append(address, 0, i);
+            }
+
+            builder.Append(replacement);
+        }
+
+        return builder?.ToString() ?? address;
+
+        static string? GetAddressReplacement(char value, bool encodeParentheses)
+        {
+            return value switch
+            {
+                ' ' => "%20",
+                '(' or ')' when encodeParentheses => "\\" + value,
+                < ' ' or '\u007F' => "%" + ((int)value).ToString("X2"),
+                >= '\u0080' and <= '\u009F' => "%C2%" + ((int)value).ToString("X2"),
+                _ => null
+            };
+        }
+        static bool HasBalancedParentheses(string address)
+        {
+            var depth = 0;
+
+            // ReSharper disable once ForCanBeConvertedToForeach
+            for (var i = 0; i < address.Length; i++)
+            {
+                var c = address[i];
+                switch (c)
+                {
+                    case '(':
+                        depth++;
+                        break;
+                    case ')' when --depth < 0:
+                        return false;
+                }
+            }
+
+            return depth == 0;
+        }
+    }
     private static bool NeedsPadding(string code)
     {
         var first = code[0];

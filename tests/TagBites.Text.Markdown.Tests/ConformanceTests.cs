@@ -144,6 +144,40 @@ public class ConformanceTests : MarkdownTestBase
         Assert.Equal(Flatten(cell), Flatten(ToPlainText(content)));
     }
 
+    [Theory]
+    [InlineData("a b.md")]
+    [InlineData("docs/getting started.md")]
+    [InlineData("x(.md")]
+    [InlineData("x).md")]
+    [InlineData("Foo_(bar).md")]
+    [InlineData("https://tagbites.com/q?a=1&b=2 c")]
+    [InlineData("zażółć.md")]
+    [InlineData("a\u0001b.md")]
+    [InlineData("a\u007Fb.md")]
+    public void LinkAddressReachesTheRenderer(string address)
+    {
+        var document = new MarkdownDocument();
+        document.AddParagraph(MarkdownText.Link("name", address));
+
+        var html = Markdig.Markdown.ToHtml(document.ToString(), s_pipeline);
+
+        Assert.Contains("<a href=", html);
+        Assert.Equal(address, GetHref(html));
+    }
+
+    [Fact]
+    public void EveryCharacterThroughC1SurvivesInAnAddress()
+    {
+        for (var code = 0; code <= 0x9F; code++)
+        {
+            var address = "x" + (char)code + "y.md";
+            var html = Markdig.Markdown.ToHtml(MarkdownText.Link("name", address).Markdown, s_pipeline);
+
+            Assert.Contains("<a href=", html);
+            Assert.Equal(address, GetHref(html));
+        }
+    }
+
     [Fact]
     public void LineBreakIsReadBackAsAHardBreak()
     {
@@ -301,6 +335,13 @@ public class ConformanceTests : MarkdownTestBase
             builder.Append(inline is LiteralInline literal ? literal.Content.ToString() : inline.ToString());
 
         return builder.ToString();
+    }
+    private static string GetHref(string html)
+    {
+        var start = html.IndexOf("<a href=\"", StringComparison.Ordinal) + 9;
+        var end = html.IndexOf('"', start);
+
+        return Uri.UnescapeDataString(html.Substring(start, end - start).Replace("&amp;", "&"));
     }
     private static string Flatten(string value) => string.Join(" ", value.Split([' ', '\t', '\n', '\r'], StringSplitOptions.RemoveEmptyEntries));
     private static string GetAnchoredHeader(MarkdownHeaderAnchorStyle style)
