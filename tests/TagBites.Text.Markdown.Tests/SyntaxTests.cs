@@ -45,6 +45,23 @@ public class SyntaxTests : MarkdownTestBase
     public void Image(string name, string address, string expected) => Assert.Equal(expected, MarkdownText.Image(name, address).Markdown);
 
     [Theory]
+    [InlineData("A free Markdown reference", "[name](x.md \"A free Markdown reference\")")]
+    [InlineData("say \"hi\"", "[name](x.md \"say \\\"hi\\\"\")")]
+    [InlineData("a \\ b", "[name](x.md \"a \\\\ b\")")]
+    [InlineData("first\nsecond", "[name](x.md \"first second\")")]
+    [InlineData("first\r\nsecond", "[name](x.md \"first second\")")]
+    [InlineData("it's (here)", "[name](x.md \"it's (here)\")")]
+    [InlineData("", "[name](x.md)")]
+    [InlineData(null, "[name](x.md)")]
+    public void Title(string? title, string expected) => Assert.Equal(expected, MarkdownText.Link("name", "x.md", title!).Markdown);
+
+    [Fact]
+    public void ImageCarriesATitle() => Assert.Equal("![logo](logo.png \"The logo\")", MarkdownText.Image("logo", "logo.png", "The logo").Markdown);
+
+    [Fact]
+    public void TitleIsNotPartOfTheCleanText() => Assert.Equal("name", MarkdownText.Link("name", "x.md", "A free Markdown reference").Text);
+
+    [Theory]
     [InlineData("a b.md", "a%20b.md")]
     [InlineData("a\tb.md", "a%09b.md")]
     [InlineData("a\nb.md", "a%0Ab.md")]

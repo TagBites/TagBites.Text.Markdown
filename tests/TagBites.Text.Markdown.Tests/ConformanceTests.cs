@@ -165,6 +165,23 @@ public class ConformanceTests : MarkdownTestBase
         Assert.Equal(address, GetHref(html));
     }
 
+    [Theory]
+    [InlineData("A free Markdown reference")]
+    [InlineData("say \"hi\"")]
+    [InlineData("a \\ b")]
+    [InlineData("the (main) guide")]
+    [InlineData("it's here")]
+    public void TitleReachesTheRenderer(string title)
+    {
+        var document = new MarkdownDocument();
+        document.AddParagraph(MarkdownText.Link("name", "x.md", title));
+
+        var html = Markdig.Markdown.ToHtml(document.ToString(), s_pipeline);
+
+        Assert.Contains("<a href=", html);
+        Assert.Equal(title, GetAttribute(html, "title"));
+    }
+
     [Fact]
     public void EveryCharacterThroughC1SurvivesInAnAddress()
     {
@@ -342,6 +359,16 @@ public class ConformanceTests : MarkdownTestBase
         var end = html.IndexOf('"', start);
 
         return Uri.UnescapeDataString(html.Substring(start, end - start).Replace("&amp;", "&"));
+    }
+    private static string GetAttribute(string html, string name)
+    {
+        var start = html.IndexOf(name + "=\"", StringComparison.Ordinal) + name.Length + 2;
+        var end = html.IndexOf('"', start);
+
+        return html.Substring(start, end - start)
+            .Replace("&quot;", "\"")
+            .Replace("&#39;", "'")
+            .Replace("&amp;", "&");
     }
     private static string Flatten(string value) => string.Join(" ", value.Split([' ', '\t', '\n', '\r'], StringSplitOptions.RemoveEmptyEntries));
     private static string GetAnchoredHeader(MarkdownHeaderAnchorStyle style)

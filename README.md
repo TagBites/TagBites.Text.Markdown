@@ -190,6 +190,7 @@ MarkdownText.Italic("text");                  // _text_
 MarkdownText.Strikethrough("text");           // ~~text~~
 MarkdownText.Code("var x;");                  // `var x;`
 MarkdownText.Link("name", "https://x.com");   // [name](https://x.com)
+MarkdownText.Link("name", "x.md", "Tooltip"); // [name](x.md "Tooltip")
 MarkdownText.Image("logo", "logo.png");       // ![logo](logo.png)
 MarkdownText.LineBreak;                       // two spaces and a new line
 ```

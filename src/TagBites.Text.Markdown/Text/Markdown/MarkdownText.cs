@@ -124,6 +124,17 @@ public readonly struct MarkdownText : IEquatable<MarkdownText>
         return new MarkdownText("[" + name.Markdown + "](" + EncodeAddress(address) + ")", name.Text);
     }
     /// <summary>
+    /// Builds a link to <paramref name="address"/> carrying <paramref name="title"/>, which a renderer shows as a tooltip.
+    /// </summary>
+    /// <inheritdoc cref="Link(MarkdownText, string)"/>
+    public static MarkdownText Link(MarkdownText name, string address, string title)
+    {
+        if (string.IsNullOrEmpty(address))
+            throw new ArgumentException("Address can not be null or empty.", nameof(address));
+
+        return new MarkdownText("[" + name.Markdown + "](" + EncodeAddress(address) + FormatTitle(title) + ")", name.Text);
+    }
+    /// <summary>
     /// Builds a link to <paramref name="target"/>, using the text of the target as the display text.
     /// </summary>
     /// <remarks>The address is <see cref="IMarkdownLinkTarget.AnchorId"/> with a leading <c>#</c>.</remarks>
@@ -160,6 +171,56 @@ public readonly struct MarkdownText : IEquatable<MarkdownText>
             throw new ArgumentException("Address can not be null or empty.", nameof(address));
 
         return new MarkdownText("![" + name.Markdown + "](" + EncodeAddress(address) + ")", name.Text);
+    }
+    /// <summary>
+    /// Builds an image held at <paramref name="address"/> carrying <paramref name="title"/>, which a renderer shows as a tooltip.
+    /// </summary>
+    /// <inheritdoc cref="Link(MarkdownText, string)"/>
+    public static MarkdownText Image(MarkdownText name, string address, string title)
+    {
+        if (string.IsNullOrEmpty(address))
+            throw new ArgumentException("Address can not be null or empty.", nameof(address));
+
+        return new MarkdownText("![" + name.Markdown + "](" + EncodeAddress(address) + FormatTitle(title) + ")", name.Text);
+    }
+
+    private static string FormatTitle(string? title)
+    {
+        return string.IsNullOrEmpty(title)
+            ? string.Empty
+            : " \"" + EscapeTitle(title!) + "\"";
+    }
+    private static string EscapeTitle(string title)
+    {
+        var builder = new StringBuilder(title.Length + 8);
+
+        for (var i = 0; i < title.Length; i++)
+        {
+            var c = title[i];
+
+            switch (c)
+            {
+                case '\\':
+                case '"':
+                    builder.Append('\\');
+                    builder.Append(c);
+                    break;
+
+                case '\r' when i + 1 < title.Length && title[i + 1] == '\n':
+                    break;
+
+                case '\r':
+                case '\n':
+                    builder.Append(' ');
+                    break;
+
+                default:
+                    builder.Append(c);
+                    break;
+            }
+        }
+
+        return builder.ToString();
     }
 
     private static string EncodeAddress(string address)
