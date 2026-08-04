@@ -155,6 +155,17 @@ section.SetCustomId("custom-id"); // ## <a id="custom-id"></a> Some section
 
 `MarkdownFormat.HeaderAnchorStyle` switches that to `{#custom-id}`.
 
+To link a section, pass it to `MarkdownText.Link` instead of writing the anchor twice:
+
+```csharp
+var section = root.AddSection("Command line options");
+
+root.AddParagraph("See " + MarkdownText.Link(section) + " below.");
+// See [Command line options](#command-line-options) below.
+```
+
+The address is `AnchorId`, which is `CustomId` when one is set and otherwise the header text in lower case with hyphens (like in GitHub).
+
 ## Text and escaping
 
 Every element takes a `MarkdownText`. A `string` you pass converts implicitly and is escaped, so text from an untrusted source cannot introduce markup:

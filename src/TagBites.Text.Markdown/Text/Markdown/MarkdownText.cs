@@ -124,9 +124,36 @@ public readonly struct MarkdownText : IEquatable<MarkdownText>
         return new MarkdownText("[" + name.Markdown + "](" + EncodeAddress(address) + ")", name.Text);
     }
     /// <summary>
+    /// Builds a link to <paramref name="target"/>, using the text of the target as the display text.
+    /// </summary>
+    /// <remarks>The address is <see cref="IMarkdownLinkTarget.AnchorId"/> with a leading <c>#</c>.</remarks>
+    /// <exception cref="ArgumentException">The target carries no anchor.</exception>
+    public static MarkdownText Link(IMarkdownLinkTarget target)
+    {
+        if (target == null)
+            throw new ArgumentNullException(nameof(target));
+
+        return Link(target.Text, target);
+    }
+    /// <summary>
+    /// Builds a link to <paramref name="target"/> with the given display text.
+    /// </summary>
+    /// <inheritdoc cref="Link(IMarkdownLinkTarget)"/>
+    public static MarkdownText Link(MarkdownText name, IMarkdownLinkTarget target)
+    {
+        if (target == null)
+            throw new ArgumentNullException(nameof(target));
+
+        var anchorId = target.AnchorId;
+        if (anchorId == null)
+            throw new ArgumentException("Target has no anchor to link to. Set CustomId.", nameof(target));
+
+        return Link(name, "#" + anchorId);
+    }
+    /// <summary>
     /// Builds an image held at <paramref name="address"/>.
     /// </summary>
-    /// <inheritdoc cref="Link"/>
+    /// <inheritdoc cref="Link(MarkdownText, string)"/>
     public static MarkdownText Image(MarkdownText name, string address)
     {
         if (string.IsNullOrEmpty(address))

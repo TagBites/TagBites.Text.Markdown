@@ -9,12 +9,15 @@ namespace TagBites.Text.Markdown;
 /// The level of the header follows the nesting, so moving a section moves its whole subtree.
 /// Set <see cref="MarkdownHeader.Level"/> for a level that does not follow the nesting.
 /// </remarks>
-public class MarkdownSection(MarkdownText text) : MarkdownContentElement
+public class MarkdownSection(MarkdownText text) : MarkdownContentElement, IMarkdownLinkTarget
 {
     /// <summary>
     /// Gets the header of the section.
     /// </summary>
     public MarkdownHeader Header { get; } = new(text);
+
+    MarkdownText IMarkdownLinkTarget.Text => Header.Text;
+    string? IMarkdownLinkTarget.AnchorId => Header.AnchorId;
 
 
     /// <inheritdoc cref="MarkdownHeader.CustomId"/>

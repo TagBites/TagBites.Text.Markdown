@@ -1,3 +1,5 @@
+using System.Text;
+
 namespace TagBites.Text.Markdown;
 
 /// <summary>
@@ -7,7 +9,7 @@ namespace TagBites.Text.Markdown;
 /// Markdown has no header below level six.
 /// A deeper one becomes bold text followed by a hard line break, which reads as a header in every renderer.
 /// </remarks>
-public class MarkdownHeader : MarkdownElement
+public class MarkdownHeader : MarkdownElement, IMarkdownLinkTarget
 {
     internal const int MinimumLevel = 1;
     internal const int MaximumLevel = 6;
@@ -47,6 +49,11 @@ public class MarkdownHeader : MarkdownElement
             field = value;
         }
     }
+    /// <summary>
+    /// Gets the identifier the header is linked to, or <c>null</c> when the text carries no letter or digit.
+    /// </summary>
+    /// <remarks>Falls back to the text in lower case with white space turned into a hyphen, which is what a renderer derives.</remarks>
+    public string? AnchorId => GetAnchor(CustomId) ?? GetDefaultAnchorId(Text.Text);
 
     /// <summary>
     /// Creates a header whose level follows the section nesting.
@@ -135,5 +142,27 @@ public class MarkdownHeader : MarkdownElement
             return null;
 
         return customId[0] == '#' ? customId.Substring(1) : customId;
+    }
+    private static string? GetDefaultAnchorId(string text)
+    {
+        var builder = new StringBuilder(text.Length);
+        var hasContent = false;
+
+        // ReSharper disable once ForCanBeConvertedToForeach
+        for (var i = 0; i < text.Length; i++)
+        {
+            var c = text[i];
+            if (char.IsLetterOrDigit(c))
+            {
+                builder.Append(char.ToLowerInvariant(c));
+                hasContent = true;
+            }
+            else if (c is '-' or '_')
+                builder.Append(c);
+            else if (char.IsWhiteSpace(c))
+                builder.Append('-');
+        }
+
+        return hasContent ? builder.ToString() : null;
     }
 }
