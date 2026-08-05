@@ -1,4 +1,4 @@
-namespace TagBites.Text.Markdown;
+﻿namespace TagBites.Text.Markdown;
 
 /// <summary>
 /// A block of text separated from its neighbours by a blank line.
@@ -6,9 +6,9 @@ namespace TagBites.Text.Markdown;
 public class MarkdownParagraph(MarkdownText text) : MarkdownElement
 {
     /// <summary>
-    /// Gets the content of the paragraph.
+    /// Gets or sets the content of the paragraph.
     /// </summary>
-    public MarkdownText Text { get; } = text;
+    public MarkdownText Text { get; set; } = text;
 
 
     /// <inheritdoc />

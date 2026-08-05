@@ -1,4 +1,4 @@
-namespace TagBites.Text.Markdown;
+﻿namespace TagBites.Text.Markdown;
 
 /// <summary>
 /// A quote, written with the <c>&gt;</c> marker on every line.
@@ -7,9 +7,9 @@ namespace TagBites.Text.Markdown;
 public class MarkdownQuote(MarkdownText text) : MarkdownContentElement
 {
     /// <summary>
-    /// Gets the text the quote starts with.
+    /// Gets or sets the text the quote starts with.
     /// </summary>
-    public MarkdownText Text { get; } = text;
+    public MarkdownText Text { get; set; } = text;
 
     /// <summary>
     /// Creates a quote that holds only block elements.

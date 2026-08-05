@@ -1,4 +1,4 @@
-namespace TagBites.Text.Markdown;
+﻿namespace TagBites.Text.Markdown;
 
 /// <summary>
 /// A fenced block of code, with an optional language.
@@ -12,13 +12,13 @@ public class MarkdownCode(string? language, string code) : MarkdownElement
     private const int MinimumFenceLength = 3;
 
     /// <summary>
-    /// Gets the language written after the opening fence, or <c>null</c> when the block has none.
+    /// Gets or sets the language written after the opening fence, or <c>null</c> when the block has none.
     /// </summary>
-    public string? Language { get; } = language;
+    public string? Language { get; set; } = language;
     /// <summary>
-    /// Gets the content of the block.
+    /// Gets or sets the content of the block.
     /// </summary>
-    public string Code { get; } = code;
+    public string Code { get; set; } = code;
 
 
     /// <inheritdoc />

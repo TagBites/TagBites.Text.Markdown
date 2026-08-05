@@ -1,4 +1,4 @@
-namespace TagBites.Text.Markdown;
+﻿namespace TagBites.Text.Markdown;
 
 /// <summary>
 /// A single item of a list, which also holds block elements of its own.
@@ -6,9 +6,9 @@ namespace TagBites.Text.Markdown;
 public class MarkdownListItem(MarkdownText text) : MarkdownContentElement
 {
     /// <summary>
-    /// Gets the text of the item, written on the line that carries the marker.
+    /// Gets or sets the text of the item, written on the line that carries the marker.
     /// </summary>
-    public MarkdownText Text { get; } = text;
+    public MarkdownText Text { get; set; } = text;
 
     /// <summary>
     /// Gets or sets the state of the check box, or <c>null</c> when the item carries none.
