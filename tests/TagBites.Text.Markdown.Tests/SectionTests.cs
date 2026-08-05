@@ -208,12 +208,6 @@ public class SectionTests : MarkdownTestBase
         AssertIgnoring("kept", doc, typeof(MarkdownSection));
     }
 
-    [Fact]
-    public void AddHeaderOnASectionThrows()
-    {
-        Assert.Throws<NotSupportedException>(() => new MarkdownSection("Title").AddHeader(2, "Nested"));
-    }
-
     [Theory]
     [InlineData(0)]
     [InlineData(7)]

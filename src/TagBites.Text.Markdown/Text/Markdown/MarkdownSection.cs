@@ -1,5 +1,3 @@
-using System.ComponentModel;
-
 namespace TagBites.Text.Markdown;
 
 /// <summary>
@@ -25,16 +23,6 @@ public class MarkdownSection(MarkdownText text) : MarkdownContentElement, IMarkd
     {
         Header.CustomId = customId;
         return this;
-    }
-
-    /// <summary>
-    /// Not available on a section, which writes its own header.
-    /// Use <see cref="MarkdownContentElement.AddSection(MarkdownText)"/> instead.
-    /// </summary>
-    [EditorBrowsable(EditorBrowsableState.Never)]
-    public new MarkdownHeader AddHeader(int level, MarkdownText text)
-    {
-        throw new NotSupportedException("A section writes its own header. Nest a section instead of adding a header to it.");
     }
 
     /// <inheritdoc />

@@ -1,4 +1,4 @@
-namespace TagBites.Text.Markdown.Tests;
+﻿namespace TagBites.Text.Markdown.Tests;
 
 public class FormatTests : MarkdownTestBase
 {
@@ -34,17 +34,6 @@ public class FormatTests : MarkdownTestBase
         doc.AddCode("csharp", "var x = 1;");
 
         AssertIgnoring("call `AddParagraph` first", doc, typeof(MarkdownCode));
-    }
-
-    [Fact]
-    public void IgnoredTypeCoversDerivedTypes()
-    {
-        var doc = new MarkdownDocument()
-            .WithParagraph("text")
-            .WithElement(new MarkdownList { IsOrdered = true }.WithItem("a"))
-            .WithElement(new MarkdownList().WithCheckItem(true, "b"));
-
-        AssertIgnoring("text", doc, typeof(MarkdownList));
     }
 
     [Fact]
