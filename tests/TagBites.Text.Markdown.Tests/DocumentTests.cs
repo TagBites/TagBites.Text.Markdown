@@ -76,6 +76,28 @@ public class DocumentTests : MarkdownTestBase
     }
 
     [Fact]
+    public void EmptyElementLeavesNoBlankLine()
+    {
+        var doc = new MarkdownDocument();
+        doc.AddParagraph("before");
+        doc.AddList();
+        doc.AddTable();
+        doc.AddParagraph("after");
+
+        AssertMarkdown(Lines("before", "", "after"), doc);
+    }
+
+    [Fact]
+    public void DocumentOfEmptyElementsRendersNothing()
+    {
+        var doc = new MarkdownDocument();
+        doc.AddList();
+        doc.AddTable();
+
+        AssertMarkdown(string.Empty, doc);
+    }
+
+    [Fact]
     public void TableBetweenParagraphs()
     {
         var doc = new MarkdownDocument()

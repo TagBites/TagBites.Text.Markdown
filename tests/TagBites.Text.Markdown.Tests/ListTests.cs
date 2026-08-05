@@ -255,6 +255,22 @@ public class ListTests : MarkdownTestBase
     }
 
     [Fact]
+    public void EmptyElementUnderItemLeavesNoBlankLine()
+    {
+        var list = new MarkdownList();
+        var item = list.AddItem("a");
+        item.AddTable();
+        item.AddParagraph("kept");
+
+        var expected = Lines(
+            "- a",
+            "",
+            "  kept");
+
+        AssertMarkdown(expected, list);
+    }
+
+    [Fact]
     public void CodeUnderItem()
     {
         var list = new MarkdownList();

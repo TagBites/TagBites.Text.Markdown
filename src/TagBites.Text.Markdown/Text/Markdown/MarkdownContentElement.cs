@@ -1,4 +1,4 @@
-namespace TagBites.Text.Markdown;
+﻿namespace TagBites.Text.Markdown;
 
 /// <summary>
 /// An element that holds other elements.
@@ -87,6 +87,8 @@ public abstract class MarkdownContentElement : MarkdownElement
 
         foreach (var element in builder.Format.GetVisible(_content))
         {
+            var start = builder.Length;
+
             if (!first || builder.Length > 0)
             {
                 builder.AppendLine();
@@ -95,8 +97,13 @@ public abstract class MarkdownContentElement : MarkdownElement
                     builder.AppendLine();
             }
 
-            first = false;
+            var separated = builder.Length;
             element.Resolve(builder);
+
+            if (builder.Length == separated)
+                builder.Truncate(start);
+            else
+                first = false;
         }
     }
 }

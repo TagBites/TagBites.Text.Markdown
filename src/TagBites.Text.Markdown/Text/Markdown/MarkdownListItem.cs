@@ -61,6 +61,7 @@ public class MarkdownListItem(MarkdownText text) : MarkdownContentElement
 
         foreach (var element in builder.Format.GetVisible(content))
         {
+            var start = builder.Length;
             builder.AppendLine();
 
             // Nested items and lists stay tight, other blocks need a blank line
@@ -78,7 +79,11 @@ public class MarkdownListItem(MarkdownText text) : MarkdownContentElement
             if (element is not MarkdownList)
                 builder.AppendLine();
 
+            var separated = builder.Length;
             element.Resolve(builder);
+
+            if (builder.Length == separated)
+                builder.Truncate(start);
         }
     }
 

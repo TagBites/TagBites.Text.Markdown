@@ -1,4 +1,4 @@
-using System.Text;
+﻿using System.Text;
 
 namespace TagBites.Text.Markdown;
 
@@ -159,6 +159,8 @@ public class MarkdownStringBuilder
             for (var i = 0; i < Indent; i++)
                 StringBuilder.Append(' ');
     }
+
+    internal void Truncate(int length) => StringBuilder.Length = length;
 
     /// <summary>
     /// Returns everything written so far.
