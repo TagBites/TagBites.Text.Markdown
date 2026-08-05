@@ -58,6 +58,12 @@ public static class MarkdownElementExtensions
         content.AddCode(language, code);
         return content;
     }
+    /// <inheritdoc cref="MarkdownContentElement.AddHtml"/>
+    public static T WithHtml<T>(this T content, string html) where T : MarkdownContentElement
+    {
+        content.AddHtml(html);
+        return content;
+    }
     /// <summary>
     /// Adds a quote that starts with <paramref name="quote"/>.
     /// </summary>

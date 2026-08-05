@@ -25,7 +25,7 @@ Every element that takes content takes a `MarkdownText`. A `string` converts imp
 
 `MarkdownText.Raw` turns escaping off for a piece of content, and the inline builders on `MarkdownText` return raw content by design. Both are the point where an untrusted value becomes dangerous:
 
-- Never pass untrusted text to `MarkdownText.Raw`.
+- Never pass untrusted text to `MarkdownText.Raw` or to `AddHtml`, which both reach the output unchanged.
 - Never build a link or an image address from untrusted text. `MarkdownText.Link` and `MarkdownText.Image` escape the display text but emit the address unchanged, so an address such as `javascript:...` reaches the renderer.
 - The content of a code block is emitted unchanged, because escaping would alter the code. A fence inside untrusted code can end the block early.
 
@@ -45,7 +45,7 @@ Escaped text is safe, but a document also carries whatever the caller passed as 
 
 The following cases are not treated as vulnerabilities in this library.
 
-- Markup or raw HTML in the output that the caller supplied through `MarkdownText.Raw`, an inline builder or a code block.
+- Markup or raw HTML in the output that the caller supplied through `MarkdownText.Raw`, `AddHtml`, an inline builder or a code block.
 - A bare URL in the text that a renderer turns into a link. Linking a literal URL is what GitHub Flavored Markdown does with text, and the produced Markdown carries no link syntax.
 - A link or an image address that the caller built from an untrusted value.
 - Behavior of the renderer that consumes the produced Markdown.

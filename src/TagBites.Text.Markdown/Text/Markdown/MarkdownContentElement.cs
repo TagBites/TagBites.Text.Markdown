@@ -46,6 +46,11 @@ public abstract class MarkdownContentElement : MarkdownElement
     /// </summary>
     public MarkdownCode AddCode(string language, string code) => AddCore(new MarkdownCode(language, code));
     /// <summary>
+    /// Adds a block of raw HTML and returns it.
+    /// </summary>
+    /// <remarks>The markup reaches the output unchanged, so it must not be built from untrusted text.</remarks>
+    public MarkdownHtml AddHtml(string html) => AddCore(new MarkdownHtml(html));
+    /// <summary>
     /// Adds a quote that holds only block elements and returns it.
     /// </summary>
     public MarkdownQuote AddQuote() => AddCore(new MarkdownQuote());
