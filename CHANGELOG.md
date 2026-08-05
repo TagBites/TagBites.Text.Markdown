@@ -4,6 +4,18 @@ All notable changes to this project are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0] - 2026-08-05
+
+### Added
+
+- `MarkdownText.Link` takes a header or a section and derives the address from its text, so a cross reference needs no hand-written anchor.
+- `MarkdownText.Link` and `MarkdownText.Image` take a title, which a renderer shows as a tooltip.
+- `MarkdownList.StartNumber` sets the number the first item of an ordered list carries.
+
+### Fixed
+
+- A link no longer breaks when its address holds a space or a parenthesis.
+
 ## [2.0.0] - 2026-08-03
 
 ### Added
@@ -42,5 +54,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 First release. Document model with headers, paragraphs, code blocks, quotes, lists, ordered lists, checklists and tables. Inline syntax through `MarkdownSyntax`, plain text rendering through `ToString(true)` and front matter extraction through `MarkdownDocumentParser`.
 
+[2.1.0]: https://github.com/TagBites/TagBites.Text.Markdown/compare/2.0.0...2.1.0
 [2.0.0]: https://github.com/TagBites/TagBites.Text.Markdown/compare/1.0.0...2.0.0
 [1.0.0]: https://github.com/TagBites/TagBites.Text.Markdown/releases/tag/1.0.0
