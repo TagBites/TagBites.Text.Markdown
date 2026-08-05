@@ -2,6 +2,7 @@ using System.Text;
 using Markdig;
 using Markdig.Extensions.Tables;
 using Markdig.Syntax;
+using Markdig.Syntax.Inlines;
 using MdTable = Markdig.Extensions.Tables.Table;
 
 namespace TagBites.Text.Markdown.Demo;
@@ -507,9 +508,146 @@ public sealed class MarkdownCodeGenerator
     {
         var literal = Literal(value, 0);
 
-        return MarkdownText.FromText(value).Markdown == value
-            ? literal
-            : $"MarkdownText.Raw({literal})";
+        if (MarkdownText.FromText(value).Markdown == value)
+            return literal;
+
+        return TryInlineExpression(value) ?? $"MarkdownText.Raw({literal})";
+    }
+    // An inline builder reads better than one raw string, so the content is rebuilt from its parts.
+    // The result is kept only where it renders back to the same Markdown.
+    private static string? TryInlineExpression(string value)
+    {
+        var paragraph = Markdig.Markdown.Parse(value, s_pipeline).OfType<ParagraphBlock>().FirstOrDefault();
+        if (paragraph?.Inline == null)
+            return null;
+
+        var content = TryBuildInline(paragraph.Inline);
+
+        return content != null && IsEquivalent(content.Value.Value.Markdown, value)
+            ? content.Value.Code
+            : null;
+    }
+    // A builder writes its own delimiters, so *text* comes back as _text_ and an address gets its spaces
+    // encoded. Both mean the same document, which is why the rendered form decides.
+    private static bool IsEquivalent(string produced, string original)
+    {
+        return produced == original
+               || Markdig.Markdown.ToHtml(produced, s_pipeline) == Markdig.Markdown.ToHtml(original, s_pipeline);
+    }
+    private static (string Code, MarkdownText Value)? TryBuildInline(ContainerInline container)
+    {
+        var parts = new List<string>();
+        var built = MarkdownText.Empty;
+        var pending = new StringBuilder();
+
+        // Text and a soft line break belong to the same literal, which keeps escaping decisions together
+        void FlushText()
+        {
+            if (pending.Length == 0)
+                return;
+
+            var text = pending.ToString();
+            parts.Add(Literal(text, 0));
+            built += text;
+            pending.Clear();
+        }
+
+        foreach (var inline in container)
+        {
+            switch (inline)
+            {
+                case LiteralInline text:
+                    pending.Append(text.Content.ToString());
+                    continue;
+
+                case LineBreakInline { IsHard: false }:
+                    pending.Append('\n');
+                    continue;
+
+                case LineBreakInline:
+                    FlushText();
+                    parts.Add("MarkdownText.LineBreak");
+                    built += MarkdownText.LineBreak;
+                    continue;
+
+                case CodeInline code:
+                    FlushText();
+                    parts.Add($"MarkdownText.Code({Literal(code.Content, 0)})");
+                    built += MarkdownText.Code(code.Content);
+                    continue;
+
+                case LinkInline link when !string.IsNullOrEmpty(link.Url):
+                    var name = GetLinkName(link);
+                    if (name == null)
+                        return null;
+
+                    FlushText();
+                    parts.Add(LinkCall(link, name.Value.Code));
+                    built += BuildLink(link, name.Value.Value);
+                    continue;
+
+                case EmphasisInline emphasis when GetEmphasisMethod(emphasis) is { } method:
+                    var inner = TryBuildInline(emphasis);
+                    if (inner == null)
+                        return null;
+
+                    FlushText();
+                    parts.Add($"MarkdownText.{method}({inner.Value.Code})");
+                    built += BuildEmphasis(method, inner.Value.Value);
+                    continue;
+
+                default:
+                    return null;
+            }
+        }
+
+        FlushText();
+
+        return parts.Count > 0 ? (string.Join(" + ", parts), built) : null;
+    }
+    private static (string Code, MarkdownText Value)? GetLinkName(LinkInline link)
+    {
+        return link.FirstChild == null
+            ? ("\"\"", MarkdownText.Empty)
+            : TryBuildInline(link);
+    }
+    private static string LinkCall(LinkInline link, string name)
+    {
+        var method = link.IsImage ? "Image" : "Link";
+        var arguments = $"{name}, {Literal(link.Url!, 0)}";
+
+        if (!string.IsNullOrEmpty(link.Title))
+            arguments += $", {Literal(link.Title!, 0)}";
+
+        return $"MarkdownText.{method}({arguments})";
+    }
+    private static MarkdownText BuildLink(LinkInline link, MarkdownText name)
+    {
+        if (string.IsNullOrEmpty(link.Title))
+            return link.IsImage ? MarkdownText.Image(name, link.Url!) : MarkdownText.Link(name, link.Url!);
+
+        return link.IsImage
+            ? MarkdownText.Image(name, link.Url!, link.Title!)
+            : MarkdownText.Link(name, link.Url!, link.Title!);
+    }
+    private static string? GetEmphasisMethod(EmphasisInline emphasis)
+    {
+        return (emphasis.DelimiterChar, emphasis.DelimiterCount) switch
+        {
+            ('*' or '_', 1) => "Italic",
+            ('*' or '_', 2) => "Bold",
+            ('~', 2) => "Strikethrough",
+            _ => null
+        };
+    }
+    private static MarkdownText BuildEmphasis(string method, MarkdownText content)
+    {
+        return method switch
+        {
+            "Italic" => MarkdownText.Italic(content),
+            "Bold" => MarkdownText.Bold(content),
+            _ => MarkdownText.Strikethrough(content)
+        };
     }
     private static string Literal(string value, int indent)
     {
