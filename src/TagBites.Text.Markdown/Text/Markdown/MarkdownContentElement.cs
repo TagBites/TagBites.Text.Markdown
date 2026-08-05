@@ -14,7 +14,7 @@ public abstract class MarkdownContentElement : MarkdownElement
     /// <summary>
     /// Gets the child elements.
     /// </summary>
-    protected IList<MarkdownElement> Content => _content ??= new List<MarkdownElement>();
+    public IList<MarkdownElement> Content => _content ??= new List<MarkdownElement>();
     private protected IList<MarkdownElement>? ContentCore => _content;
 
 
