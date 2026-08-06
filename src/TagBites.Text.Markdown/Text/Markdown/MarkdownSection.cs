@@ -1,4 +1,4 @@
-namespace TagBites.Text.Markdown;
+﻿namespace TagBites.Text.Markdown;
 
 /// <summary>
 /// A header together with the content that belongs under it.
@@ -26,19 +26,19 @@ public class MarkdownSection(MarkdownText text) : MarkdownContentElement, IMarkd
     }
 
     /// <inheritdoc />
-    protected internal override void Resolve(MarkdownStringBuilder builder)
+    protected internal override void Resolve(MarkdownRenderer renderer)
     {
-        var level = Header.Level ?? builder.SectionLevel + 1;
+        var level = Header.Level ?? renderer.SectionLevel + 1;
 
-        MarkdownHeader.Write(builder, level, Header.Text, Header.CustomId);
+        MarkdownHeader.Write(renderer, level, Header.Text, Header.CustomId);
 
         // A header below level six is bold text, which the content follows on the next line
-        var blankLineBeforeContent = builder.Format.IsPlainText || level <= MarkdownHeader.MaximumLevel;
+        var blankLineBeforeContent = renderer.Format.IsPlainText || level <= MarkdownHeader.MaximumLevel;
         if (!blankLineBeforeContent)
-            builder.Append("  ");
+            renderer.Append("  ");
 
-        builder.PushSectionLevel(level);
-        ResolveContent(builder, blankLineBeforeContent);
-        builder.PopSectionLevel();
+        renderer.PushSectionLevel(level);
+        ResolveContent(renderer, blankLineBeforeContent);
+        renderer.PopSectionLevel();
     }
 }

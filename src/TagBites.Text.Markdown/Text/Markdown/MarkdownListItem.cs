@@ -50,51 +50,51 @@ public class MarkdownListItem(MarkdownText text) : MarkdownContentElement
     }
 
     /// <inheritdoc />
-    protected internal override void Resolve(MarkdownStringBuilder builder)
+    protected internal override void Resolve(MarkdownRenderer renderer)
     {
-        WriteCheckBox(builder);
-        builder.Append(Text);
+        WriteCheckBox(renderer);
+        renderer.Append(Text);
 
         var content = ContentCore;
         if (content == null || content.Count == 0)
             return;
 
-        foreach (var element in builder.Format.GetVisible(content))
+        foreach (var element in renderer.Format.GetVisible(content))
         {
-            var start = builder.Length;
-            builder.AppendLine();
+            var start = renderer.Length;
+            renderer.AppendLine();
 
             // Nested items and lists stay tight, other blocks need a blank line
             if (element is MarkdownListItem child)
             {
-                var marker = builder.Format.IsPlainText ? string.Empty : "- ";
+                var marker = renderer.Format.IsPlainText ? string.Empty : "- ";
 
-                builder.Append(marker);
-                builder.PushIndent(marker.Length);
-                child.Resolve(builder);
-                builder.PopIndent();
+                renderer.Append(marker);
+                renderer.PushPrefix(new string(' ', marker.Length));
+                child.Resolve(renderer);
+                renderer.PopPrefix();
                 continue;
             }
 
             if (element is not MarkdownList)
-                builder.AppendLine();
+                renderer.AppendLine();
 
-            var separated = builder.Length;
-            element.Resolve(builder);
+            var separated = renderer.Length;
+            element.Resolve(renderer);
 
-            if (builder.Length == separated)
-                builder.Truncate(start);
+            if (renderer.Length == separated)
+                renderer.Truncate(start);
         }
     }
 
-    private void WriteCheckBox(MarkdownStringBuilder builder)
+    private void WriteCheckBox(MarkdownRenderer renderer)
     {
         if (IsChecked == null)
             return;
 
-        if (builder.Format.IsPlainText)
-            builder.Append(IsChecked.Value ? "☑ " : "☐ ");
+        if (renderer.Format.IsPlainText)
+            renderer.Append(IsChecked.Value ? "☑ " : "☐ ");
         else
-            builder.Append(IsChecked.Value ? "[x] " : "[ ] ");
+            renderer.Append(IsChecked.Value ? "[x] " : "[ ] ");
     }
 }

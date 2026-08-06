@@ -12,8 +12,8 @@ public class MarkdownParagraph(MarkdownText text) : MarkdownElement
 
 
     /// <inheritdoc />
-    protected internal override void Resolve(MarkdownStringBuilder builder)
+    protected internal override void Resolve(MarkdownRenderer renderer)
     {
-        builder.Append(Text);
+        renderer.Append(Text);
     }
 }

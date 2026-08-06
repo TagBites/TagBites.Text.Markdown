@@ -1,4 +1,4 @@
-using System.Text;
+﻿using System.Text;
 
 namespace TagBites.Text.Markdown;
 
@@ -77,36 +77,36 @@ public class MarkdownHeader : MarkdownElement, IMarkdownLinkTarget
     }
 
     /// <inheritdoc />
-    protected internal override void Resolve(MarkdownStringBuilder builder)
+    protected internal override void Resolve(MarkdownRenderer renderer)
     {
-        Write(builder, Level ?? builder.SectionLevel + 1, Text, CustomId);
+        Write(renderer, Level ?? renderer.SectionLevel + 1, Text, CustomId);
     }
 
-    internal static void Write(MarkdownStringBuilder builder, int level, MarkdownText text, string? customId)
+    internal static void Write(MarkdownRenderer renderer, int level, MarkdownText text, string? customId)
     {
-        if (builder.Format.IsPlainText)
+        if (renderer.Format.IsPlainText)
         {
-            builder.Append(text);
+            renderer.Append(text);
             return;
         }
 
         var anchor = GetAnchor(customId);
-        var style = builder.Format.HeaderAnchorStyle;
+        var style = renderer.Format.HeaderAnchorStyle;
 
         if (level > MaximumLevel)
         {
-            WriteAnchor(builder, anchor, style, MarkdownHeaderAnchorStyle.HtmlAnchor);
-            builder.Append(MarkdownText.Bold(text));
-            WriteAnchor(builder, anchor, style, MarkdownHeaderAnchorStyle.Attribute);
+            WriteAnchor(renderer, anchor, style, MarkdownHeaderAnchorStyle.HtmlAnchor);
+            renderer.Append(MarkdownText.Bold(text));
+            WriteAnchor(renderer, anchor, style, MarkdownHeaderAnchorStyle.Attribute);
             return;
         }
 
-        builder.Append('#', level);
-        builder.Append(' ');
+        renderer.Append('#', level);
+        renderer.Append(' ');
 
-        WriteAnchor(builder, anchor, style, MarkdownHeaderAnchorStyle.HtmlAnchor);
-        builder.Append(text);
-        WriteAnchor(builder, anchor, style, MarkdownHeaderAnchorStyle.Attribute);
+        WriteAnchor(renderer, anchor, style, MarkdownHeaderAnchorStyle.HtmlAnchor);
+        renderer.Append(text);
+        WriteAnchor(renderer, anchor, style, MarkdownHeaderAnchorStyle.Attribute);
     }
     internal static void ValidateCustomId(string? value)
     {
@@ -118,22 +118,22 @@ public class MarkdownHeader : MarkdownElement, IMarkdownLinkTarget
                 throw new ArgumentException("Custom id can not contain a brace, a quote, an angle bracket or white space.", nameof(value));
     }
 
-    private static void WriteAnchor(MarkdownStringBuilder builder, string? anchor, MarkdownHeaderAnchorStyle style, MarkdownHeaderAnchorStyle expected)
+    private static void WriteAnchor(MarkdownRenderer renderer, string? anchor, MarkdownHeaderAnchorStyle style, MarkdownHeaderAnchorStyle expected)
     {
         if (anchor == null || style != expected)
             return;
 
         if (style == MarkdownHeaderAnchorStyle.HtmlAnchor)
         {
-            builder.Append("<a id=\"");
-            builder.Append(anchor);
-            builder.Append("\"></a> ");
+            renderer.Append("<a id=\"");
+            renderer.Append(anchor);
+            renderer.Append("\"></a> ");
         }
         else
         {
-            builder.Append("{#");
-            builder.Append(anchor);
-            builder.Append('}');
+            renderer.Append("{#");
+            renderer.Append(anchor);
+            renderer.Append('}');
         }
     }
     private static string? GetAnchor(string? customId)

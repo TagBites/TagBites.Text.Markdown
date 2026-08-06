@@ -1,4 +1,4 @@
-using System.Globalization;
+﻿using System.Globalization;
 using System.Text;
 
 namespace TagBites.Text.Markdown;
@@ -159,30 +159,30 @@ public class MarkdownFrontMatter : IEnumerable<KeyValuePair<string, string>>
     }
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-    internal void Resolve(MarkdownStringBuilder builder)
+    internal void Resolve(MarkdownRenderer renderer)
     {
         if (IsEmpty)
             return;
 
-        builder.Append("---");
+        renderer.Append("---");
 
         foreach (var entry in _entries)
         {
             if (!entry.HasValue)
                 continue;
 
-            builder.AppendLine();
-            AppendScalar(builder, entry.Name, false);
-            builder.Append(": ");
+            renderer.AppendLine();
+            AppendScalar(renderer, entry.Name, false);
+            renderer.Append(": ");
 
             if (entry.Value != null)
-                AppendScalar(builder, entry.Value, false);
+                AppendScalar(renderer, entry.Value, false);
             else
-                AppendList(builder, entry.Values!);
+                AppendList(renderer, entry.Values!);
         }
 
-        builder.AppendLine();
-        builder.Append("---");
+        renderer.AppendLine();
+        renderer.Append("---");
     }
 
     private void Add(string name, string value)
@@ -231,25 +231,25 @@ public class MarkdownFrontMatter : IEnumerable<KeyValuePair<string, string>>
         if (name.Length == 0)
             throw new ArgumentException("Entry name can not be empty.", nameof(name));
     }
-    private static void AppendList(MarkdownStringBuilder builder, List<string> values)
+    private static void AppendList(MarkdownRenderer renderer, List<string> values)
     {
-        builder.Append('[');
+        renderer.Append('[');
 
         for (var i = 0; i < values.Count; i++)
         {
             if (i > 0)
-                builder.Append(", ");
+                renderer.Append(", ");
 
-            AppendScalar(builder, values[i] ?? string.Empty, true);
+            AppendScalar(renderer, values[i] ?? string.Empty, true);
         }
 
-        builder.Append(']');
+        renderer.Append(']');
     }
-    private static void AppendScalar(MarkdownStringBuilder builder, string value, bool inList)
+    private static void AppendScalar(MarkdownRenderer renderer, string value, bool inList)
     {
         if (!NeedsQuoting(value, inList))
         {
-            builder.Append(value);
+            renderer.Append(value);
             return;
         }
 
@@ -274,7 +274,7 @@ public class MarkdownFrontMatter : IEnumerable<KeyValuePair<string, string>>
             }
 
         text.Append('"');
-        builder.Append(text.ToString());
+        renderer.Append(text.ToString());
     }
     private static bool NeedsQuoting(string value, bool inList)
     {

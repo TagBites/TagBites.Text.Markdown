@@ -1,4 +1,4 @@
-namespace TagBites.Text.Markdown;
+﻿namespace TagBites.Text.Markdown;
 
 /// <summary>
 /// A horizontal rule between two blocks, written as <c>---</c>.
@@ -7,9 +7,9 @@ namespace TagBites.Text.Markdown;
 public class MarkdownThematicBreak : MarkdownElement
 {
     /// <inheritdoc />
-    protected internal override void Resolve(MarkdownStringBuilder builder)
+    protected internal override void Resolve(MarkdownRenderer renderer)
     {
-        if (!builder.Format.IsPlainText)
-            builder.Append("---");
+        if (!renderer.Format.IsPlainText)
+            renderer.Append("---");
     }
 }

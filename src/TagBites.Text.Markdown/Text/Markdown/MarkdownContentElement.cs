@@ -81,32 +81,36 @@ public abstract class MarkdownContentElement : MarkdownElement
     }
 
     /// <inheritdoc />
-    protected internal override void Resolve(MarkdownStringBuilder builder) => ResolveContent(builder, true);
+    protected internal override void Resolve(MarkdownRenderer renderer) => ResolveContent(renderer, true);
 
-    private protected void ResolveContent(MarkdownStringBuilder builder, bool blankLineBeforeFirst)
+    private protected void ResolveContent(MarkdownRenderer renderer, bool blankLineBeforeFirst)
+    {
+        ResolveContent(renderer, blankLineBeforeFirst, renderer.Length > 0);
+    }
+    private protected void ResolveContent(MarkdownRenderer renderer, bool blankLineBeforeFirst, bool hasContentBefore)
     {
         if (_content == null)
             return;
 
         var first = true;
 
-        foreach (var element in builder.Format.GetVisible(_content))
+        foreach (var element in renderer.Format.GetVisible(_content))
         {
-            var start = builder.Length;
+            var start = renderer.Length;
 
-            if (!first || builder.Length > 0)
+            if (!first || hasContentBefore)
             {
-                builder.AppendLine();
+                renderer.AppendLine();
 
                 if (!first || blankLineBeforeFirst)
-                    builder.AppendLine();
+                    renderer.AppendLine();
             }
 
-            var separated = builder.Length;
-            element.Resolve(builder);
+            var separated = renderer.Length;
+            element.Resolve(renderer);
 
-            if (builder.Length == separated)
-                builder.Truncate(start);
+            if (renderer.Length == separated)
+                renderer.Truncate(start);
             else
                 first = false;
         }

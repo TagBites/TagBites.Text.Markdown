@@ -1,4 +1,4 @@
-namespace TagBites.Text.Markdown;
+﻿namespace TagBites.Text.Markdown;
 
 /// <summary>
 /// A table with a header row, written with the <c>|</c> marker.
@@ -134,34 +134,34 @@ public class MarkdownTable : MarkdownElement
     }
 
     /// <inheritdoc />
-    protected internal override void Resolve(MarkdownStringBuilder builder)
+    protected internal override void Resolve(MarkdownRenderer renderer)
     {
-        if (builder.Format.IsPlainText)
-            ResolveCleanText(builder);
+        if (renderer.Format.IsPlainText)
+            ResolveCleanText(renderer);
         else
-            ResolveMarkdown(builder);
+            ResolveMarkdown(renderer);
     }
 
-    private void ResolveCleanText(MarkdownStringBuilder builder)
+    private void ResolveCleanText(MarkdownRenderer renderer)
     {
         var written = false;
 
         if (Headers.Count > 0)
         {
-            WriteCleanTextRow(builder, Headers);
+            WriteCleanTextRow(renderer, Headers);
             written = true;
         }
 
         foreach (var row in Rows)
         {
             if (written)
-                builder.AppendLine();
+                renderer.AppendLine();
 
-            WriteCleanTextRow(builder, row);
+            WriteCleanTextRow(renderer, row);
             written = true;
         }
     }
-    private void ResolveMarkdown(MarkdownStringBuilder builder)
+    private void ResolveMarkdown(MarkdownRenderer renderer)
     {
         // A table without a single column has no valid delimiter row
         if (Headers.Count == 0 && Rows.Count == 0)
@@ -169,14 +169,14 @@ public class MarkdownTable : MarkdownElement
 
         var widths = GetWidths();
 
-        WriteRow(builder, Headers, widths);
-        builder.AppendLine();
-        WriteSeparatorRow(builder, widths);
+        WriteRow(renderer, Headers, widths);
+        renderer.AppendLine();
+        WriteSeparatorRow(renderer, widths);
 
         foreach (var row in Rows)
         {
-            builder.AppendLine();
-            WriteRow(builder, row, widths);
+            renderer.AppendLine();
+            WriteRow(renderer, row, widths);
         }
     }
 
@@ -203,69 +203,69 @@ public class MarkdownTable : MarkdownElement
     }
     private MarkdownTableColumnAlignment GetAlignment(int column) => column < Alignments.Count ? Alignments[column] : MarkdownTableColumnAlignment.None;
 
-    private void WriteSeparatorRow(MarkdownStringBuilder builder, int[] widths)
+    private void WriteSeparatorRow(MarkdownRenderer renderer, int[] widths)
     {
-        builder.Append("| ");
+        renderer.Append("| ");
 
         for (var i = 0; i < widths.Length; i++)
         {
             if (i > 0)
-                builder.Append(" | ");
+                renderer.Append(" | ");
 
-            WriteSeparator(builder, widths[i], GetAlignment(i));
+            WriteSeparator(renderer, widths[i], GetAlignment(i));
         }
 
-        builder.Append(" |");
+        renderer.Append(" |");
     }
 
-    private static void WriteRow(MarkdownStringBuilder builder, IList<MarkdownText> cells, int[] widths)
+    private static void WriteRow(MarkdownRenderer renderer, IList<MarkdownText> cells, int[] widths)
     {
-        builder.Append("| ");
+        renderer.Append("| ");
 
         for (var i = 0; i < widths.Length; i++)
         {
             if (i > 0)
-                builder.Append(" | ");
+                renderer.Append(" | ");
 
             var cell = i < cells.Count ? EscapeCell(cells[i]) : string.Empty;
-            builder.Append(cell);
-            builder.AppendSpaces(widths[i] - cell.Length);
+            renderer.Append(cell);
+            renderer.AppendSpaces(widths[i] - cell.Length);
         }
 
-        builder.Append(" |");
+        renderer.Append(" |");
     }
-    private static void WriteCleanTextRow(MarkdownStringBuilder builder, IList<MarkdownText> cells)
+    private static void WriteCleanTextRow(MarkdownRenderer renderer, IList<MarkdownText> cells)
     {
         for (var i = 0; i < cells.Count; i++)
         {
             if (i > 0)
-                builder.Append(" ");
+                renderer.Append(" ");
 
-            builder.Append(Flatten(cells[i].Text));
+            renderer.Append(Flatten(cells[i].Text));
         }
     }
-    private static void WriteSeparator(MarkdownStringBuilder builder, int width, MarkdownTableColumnAlignment alignment)
+    private static void WriteSeparator(MarkdownRenderer renderer, int width, MarkdownTableColumnAlignment alignment)
     {
         switch (alignment)
         {
             case MarkdownTableColumnAlignment.Left:
-                builder.Append(':');
-                builder.Append('-', width - 1);
+                renderer.Append(':');
+                renderer.Append('-', width - 1);
                 break;
 
             case MarkdownTableColumnAlignment.Right:
-                builder.Append('-', width - 1);
-                builder.Append(':');
+                renderer.Append('-', width - 1);
+                renderer.Append(':');
                 break;
 
             case MarkdownTableColumnAlignment.Center:
-                builder.Append(':');
-                builder.Append('-', width - 2);
-                builder.Append(':');
+                renderer.Append(':');
+                renderer.Append('-', width - 2);
+                renderer.Append(':');
                 break;
 
             default:
-                builder.Append('-', width);
+                renderer.Append('-', width);
                 break;
         }
     }

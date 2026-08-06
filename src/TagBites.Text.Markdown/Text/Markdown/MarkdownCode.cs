@@ -22,26 +22,26 @@ public class MarkdownCode(string? language, string code) : MarkdownElement
 
 
     /// <inheritdoc />
-    protected internal override void Resolve(MarkdownStringBuilder builder)
+    protected internal override void Resolve(MarkdownRenderer renderer)
     {
-        if (builder.Format.IsPlainText)
+        if (renderer.Format.IsPlainText)
         {
-            builder.Append(Code);
+            renderer.Append(Code);
             return;
         }
 
         // The fence has to outlast the longest run of backticks in the code
         var length = Math.Max(MinimumFenceLength, MarkdownEscaper.GetLongestRun(Code, '`') + 1);
 
-        builder.Append('`', length);
+        renderer.Append('`', length);
         {
             if (Language is { Length: > 0 })
-                builder.Append(Language);
+                renderer.Append(Language);
 
-            builder.AppendLine();
-            builder.Append(Code);
-            builder.AppendLine();
+            renderer.AppendLine();
+            renderer.Append(Code);
+            renderer.AppendLine();
         }
-        builder.Append('`', length);
+        renderer.Append('`', length);
     }
 }

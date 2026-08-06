@@ -1,4 +1,4 @@
-namespace TagBites.Text.Markdown;
+﻿namespace TagBites.Text.Markdown;
 
 /// <summary>
 /// A list of items, written with the <c>-</c> marker.
@@ -57,9 +57,9 @@ public class MarkdownList : MarkdownElement
     }
 
     /// <inheritdoc />
-    protected internal override void Resolve(MarkdownStringBuilder builder)
+    protected internal override void Resolve(MarkdownRenderer renderer)
     {
-        var format = builder.Format;
+        var format = renderer.Format;
         var separate = format.SeparateLooseListItems && !format.IsPlainText && IsLoose(format);
         var index = 0;
 
@@ -67,10 +67,10 @@ public class MarkdownList : MarkdownElement
         {
             if (index > 0)
             {
-                builder.AppendLine();
+                renderer.AppendLine();
 
                 if (separate)
-                    builder.AppendLine();
+                    renderer.AppendLine();
             }
 
             var marker = IsOrdered
@@ -79,12 +79,12 @@ public class MarkdownList : MarkdownElement
 
             index++;
 
-            builder.Append(marker);
+            renderer.Append(marker);
 
             // The content of the item lines up with its text, which is the column after the marker
-            builder.PushIndent(marker.Length);
-            item.Resolve(builder);
-            builder.PopIndent();
+            renderer.PushPrefix(new string(' ', marker.Length));
+            item.Resolve(renderer);
+            renderer.PopPrefix();
         }
     }
 

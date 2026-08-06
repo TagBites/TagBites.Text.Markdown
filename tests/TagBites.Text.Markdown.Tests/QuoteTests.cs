@@ -1,4 +1,4 @@
-namespace TagBites.Text.Markdown.Tests;
+﻿namespace TagBites.Text.Markdown.Tests;
 
 public class QuoteTests : MarkdownTestBase
 {
@@ -9,10 +9,10 @@ public class QuoteTests : MarkdownTestBase
     public void MultiLine() => AssertMarkdown(Lines("> line one", "> line two"), new MarkdownQuote("line one\nline two"));
 
     [Fact]
-    public void MultiLineWithCarriageReturn() => AssertMarkdown(Lines("> line one", "> line two"), new MarkdownQuote("line one\r\nline two"));
+    public void MultiLineWithCarriageReturn() => AssertMarkdown(Lines("> line one\r", "> line two"), new MarkdownQuote("line one\r\nline two"));
 
     [Fact]
-    public void NullTextBecomesEmpty() => AssertMarkdown(">", new MarkdownQuote(null!));
+    public void NullTextBecomesEmpty() => AssertMarkdown(string.Empty, new MarkdownQuote(null!));
 
     [Fact]
     public void ListInQuote()

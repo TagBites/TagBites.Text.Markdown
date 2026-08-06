@@ -20,44 +20,19 @@ public class MarkdownQuote(MarkdownText text) : MarkdownContentElement
 
 
     /// <inheritdoc />
-    protected internal override void Resolve(MarkdownStringBuilder builder)
+    protected internal override void Resolve(MarkdownRenderer renderer)
     {
-        // Content is rendered separately, then every line gets the '>' marker
-        var inner = new MarkdownStringBuilder(builder.Format);
+        var marked = !renderer.Format.IsPlainText;
 
-        // A section inside a quote continues the numbering of the surrounding document
-        if (builder.SectionLevel > 0)
-            inner.PushSectionLevel(builder.SectionLevel);
+        if (marked)
+            renderer.PushPrefix("> ");
 
         if (!Text.IsEmpty)
-            inner.Append(Text);
+            renderer.Append(Text);
 
-        base.Resolve(inner);
+        ResolveContent(renderer, true, !Text.IsEmpty);
 
-        var content = inner.ToString();
-
-        if (builder.Format.IsPlainText)
-        {
-            builder.Append(content);
-            return;
-        }
-
-        var lines = content.Split('\n');
-
-        for (var i = 0; i < lines.Length; i++)
-        {
-            if (i > 0)
-                builder.AppendLine();
-
-            var line = lines[i].TrimEnd('\r');
-
-            if (line.Length == 0)
-                builder.Append(">");
-            else
-            {
-                builder.Append("> ");
-                builder.Append(line);
-            }
-        }
+        if (marked)
+            renderer.PopPrefix();
     }
 }

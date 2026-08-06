@@ -13,9 +13,9 @@ public class MarkdownHtml(string html) : MarkdownElement
 
 
     /// <inheritdoc />
-    protected internal override void Resolve(MarkdownStringBuilder builder)
+    protected internal override void Resolve(MarkdownRenderer renderer)
     {
         if (!string.IsNullOrEmpty(Html))
-            builder.Append(Html);
+            renderer.Append(Html);
     }
 }

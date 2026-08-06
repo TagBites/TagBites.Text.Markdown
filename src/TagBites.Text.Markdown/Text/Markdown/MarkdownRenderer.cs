@@ -5,24 +5,21 @@ namespace TagBites.Text.Markdown;
 /// <summary>
 /// The output an element writes itself into.
 /// </summary>
-/// <remarks>
-/// Keeps the indent and the section level that the surrounding elements established.
-/// An element therefore does not need to know where it sits in the document.
-/// </remarks>
-public class MarkdownStringBuilder
+public abstract class MarkdownRenderer
 {
-    private readonly Stack<int> _indents = new();
+    private readonly Stack<int> _prefixes = new();
     private readonly Stack<int> _sectionLevels = new();
+    private readonly StringBuilder _prefix = new();
+    private bool _atLineStart = true;
 
-    private StringBuilder StringBuilder { get; }
     /// <summary>
-    /// Gets the number of spaces every new line is indented by.
+    /// Gets the text every new line starts with.
     /// </summary>
-    public int Indent { get; private set; }
+    public string Prefix => _prefix.ToString();
     /// <summary>
     /// Gets the number of characters written so far.
     /// </summary>
-    public int Length => StringBuilder.Length;
+    public abstract int Length { get; }
 
     /// <summary>
     /// Gets the format the document is written with.
@@ -35,16 +32,9 @@ public class MarkdownStringBuilder
     public int SectionLevel { get; private set; }
 
     /// <summary>
-    /// Creates a builder that writes into a new <see cref="System.Text.StringBuilder"/>.
+    /// Creates a renderer that writes with the given format, which the constructor makes read-only.
     /// </summary>
-    public MarkdownStringBuilder(MarkdownFormat format)
-        : this(new StringBuilder(), format)
-    { }
-    /// <summary>
-    /// Creates a builder that appends to <paramref name="stringBuilder"/>.
-    /// </summary>
-    /// <remarks>The constructor makes <paramref name="format"/> read-only.</remarks>
-    public MarkdownStringBuilder(StringBuilder stringBuilder, MarkdownFormat format)
+    protected MarkdownRenderer(MarkdownFormat format)
     {
         if (format == null)
             throw new ArgumentNullException(nameof(format));
@@ -52,30 +42,26 @@ public class MarkdownStringBuilder
         // Writing freezes the format, so it cannot change while a document is produced
         format.MakeReadOnly();
 
-        StringBuilder = stringBuilder;
         Format = format;
     }
 
 
     /// <summary>
-    /// Indents the following lines by <paramref name="columns"/> more spaces.
+    /// Starts every following line with <paramref name="prefix"/> on top of the current one.
     /// </summary>
-    /// <remarks>
-    /// A block inside a list item lines up with the text of the item, so the caller passes the width
-    /// of the marker it has just written.
-    /// </remarks>
-    public void PushIndent(int columns)
+    /// <remarks>An empty line receives the prefix without its trailing spaces, so a quote keeps its marker.</remarks>
+    public void PushPrefix(string prefix)
     {
-        if (columns < 0)
-            throw new ArgumentOutOfRangeException(nameof(columns));
+        if (prefix == null)
+            throw new ArgumentNullException(nameof(prefix));
 
-        _indents.Push(Indent);
-        Indent += columns;
+        _prefixes.Push(prefix.Length);
+        _prefix.Append(prefix);
     }
     /// <summary>
-    /// Restores the indent that was in place before the last <see cref="PushIndent"/>.
+    /// Removes the prefix added by the last <see cref="PushPrefix"/>.
     /// </summary>
-    public void PopIndent() => Indent = _indents.Pop();
+    public void PopPrefix() => _prefix.Length -= _prefixes.Pop();
 
     /// <summary>
     /// Sets the level the sections written next are nested under.
@@ -94,7 +80,7 @@ public class MarkdownStringBuilder
     public void PopSectionLevel() => SectionLevel = _sectionLevels.Pop();
 
     /// <summary>
-    /// Appends a single character, applying the indent at the start of a line.
+    /// Appends a single character, writing the prefix at the start of a line.
     /// </summary>
     public void Append(char value)
     {
@@ -102,8 +88,8 @@ public class MarkdownStringBuilder
             AppendLine();
         else
         {
-            AppendIndent();
-            StringBuilder.Append(value);
+            WritePrefix(false);
+            Write(value);
         }
     }
     /// <inheritdoc cref="Append(char)"/>
@@ -116,8 +102,8 @@ public class MarkdownStringBuilder
             if (i > 0)
                 AppendLine();
 
-            AppendIndent();
-            StringBuilder.Append(lines[i]);
+            WritePrefix(false);
+            Write(lines[i]);
         }
     }
     /// <summary>
@@ -132,10 +118,10 @@ public class MarkdownStringBuilder
         }
         else
         {
-            AppendIndent();
+            WritePrefix(false);
 
             for (var i = 0; i < count; i++)
-                StringBuilder.Append(value);
+                Write(value);
         }
     }
     /// <summary>
@@ -151,19 +137,52 @@ public class MarkdownStringBuilder
     /// </summary>
     public void AppendLine()
     {
-        StringBuilder.Append("\n");
-    }
-    private void AppendIndent()
-    {
-        if (StringBuilder.Length == 0 || StringBuilder[StringBuilder.Length - 1] == '\n')
-            for (var i = 0; i < Indent; i++)
-                StringBuilder.Append(' ');
-    }
+        // A line that stays empty keeps the prefix without its trailing spaces, so '> ' becomes '>'
+        WritePrefix(true);
 
-    internal void Truncate(int length) => StringBuilder.Length = length;
+        Write('\n');
+        _atLineStart = true;
+
+        OnLineWritten();
+    }
 
     /// <summary>
-    /// Returns everything written so far.
+    /// Sends everything the renderer still holds to its destination.
     /// </summary>
-    public override string ToString() => StringBuilder.ToString();
+    public virtual void Flush() { }
+
+    /// <summary>
+    /// Writes to the destination, without touching the prefix.
+    /// </summary>
+    protected abstract void Write(char value);
+    /// <inheritdoc cref="Write(char)"/>
+    protected abstract void Write(string value);
+    /// <summary>
+    /// Drops everything past <paramref name="length"/>.
+    /// </summary>
+    /// <returns>The character the output now ends with, or <c>'\n'</c> when nothing is left.</returns>
+    protected abstract char TruncateCore(int length);
+    /// <summary>
+    /// Runs after every line has been written.
+    /// </summary>
+    protected virtual void OnLineWritten() { }
+
+    private void WritePrefix(bool trimEnd)
+    {
+        if (!_atLineStart)
+            return;
+
+        _atLineStart = false;
+
+        var length = _prefix.Length;
+
+        if (trimEnd)
+            while (length > 0 && _prefix[length - 1] == ' ')
+                length--;
+
+        for (var i = 0; i < length; i++)
+            Write(_prefix[i]);
+    }
+
+    internal void Truncate(int length) => _atLineStart = TruncateCore(length) == '\n';
 }

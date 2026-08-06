@@ -1,4 +1,4 @@
-namespace TagBites.Text.Markdown;
+﻿namespace TagBites.Text.Markdown;
 
 /// <summary>
 /// The root of a document.
@@ -20,12 +20,12 @@ public class MarkdownDocument : MarkdownContentElement
 
 
     /// <inheritdoc />
-    protected internal override void Resolve(MarkdownStringBuilder builder)
+    protected internal override void Resolve(MarkdownRenderer renderer)
     {
         // Front matter carries metadata about the document, which is not part of its text
-        if (FrontMatter != null && !builder.Format.IsPlainText)
-            FrontMatter.Resolve(builder);
+        if (FrontMatter != null && !renderer.Format.IsPlainText)
+            FrontMatter.Resolve(renderer);
 
-        ResolveContent(builder, true);
+        ResolveContent(renderer, true);
     }
 }
