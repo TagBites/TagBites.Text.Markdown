@@ -4,6 +4,24 @@ All notable changes to this project are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.0] - 2026-08-06
+
+### Added
+
+- `Content` is public on every container, not only on the document.
+- `AddHtml` writes a block of raw HTML.
+- `WriteTo` writes an element to a `Stream` or a `TextWriter`.
+- `Text` on a paragraph, a quote and a list item, and `Code` on a code block, are settable.
+
+### Changed
+
+- `AddHeader` on a section adds a header instead of throwing.
+- `MarkdownStringBuilder` becomes `MarkdownRenderer`.
+
+### Fixed
+
+- An empty element no longer leaves blank lines behind.
+
 ## [2.1.0] - 2026-08-05
 
 ### Added
@@ -54,6 +72,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 First release. Document model with headers, paragraphs, code blocks, quotes, lists, ordered lists, checklists and tables. Inline syntax through `MarkdownSyntax`, plain text rendering through `ToString(true)` and front matter extraction through `MarkdownDocumentParser`.
 
+[2.2.0]: https://github.com/TagBites/TagBites.Text.Markdown/compare/2.1.0...2.2.0
 [2.1.0]: https://github.com/TagBites/TagBites.Text.Markdown/compare/2.0.0...2.1.0
 [2.0.0]: https://github.com/TagBites/TagBites.Text.Markdown/compare/1.0.0...2.0.0
 [1.0.0]: https://github.com/TagBites/TagBites.Text.Markdown/releases/tag/1.0.0

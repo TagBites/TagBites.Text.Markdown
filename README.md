@@ -42,6 +42,15 @@ doc.AddList()
 var markdown = doc.ToString();
 ```
 
+`ToString` returns the whole document. `WriteTo` sends it to a `Stream` or a `TextWriter` as it is produced, so a large document never has to fit in memory:
+
+```csharp
+using var file = File.Create("readme.md");
+doc.WriteTo(file);
+```
+
+A stream receives UTF-8 without a byte order mark and stays open.
+
 Output:
 
 ```markdown
@@ -75,6 +84,7 @@ What the parser accepts:
 - task lists (`AddCheckItem`), a check box on any list item
 - tables (`AddTable`), with padded columns, column alignment and cell escaping
 - thematic breaks (`AddThematicBreak`)
+- raw HTML blocks (`AddHtml`)
 
 `MarkdownDocument`, `MarkdownSection`, `MarkdownQuote` and `MarkdownListItem` hold any block element. `MarkdownList` holds items and `MarkdownTable` holds cells. Every other element is a leaf.
 
@@ -130,7 +140,7 @@ Install it and start.
 ...
 ```
 
-> A section writes its own header, so `AddHeader` on a section throws - nest another section instead.
+> A section writes its own header, so nest another section rather than adding a header to it.
 
 A level can be forced using an overload:
 

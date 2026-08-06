@@ -13,7 +13,7 @@
 
   <!-- Package info -->
   <PropertyGroup>
-    <Description>Builds Markdown documents from a typed element tree. Renders headers, tables, lists, checklists, quotes and code blocks as Markdig-compatible Markdown or as plain text.</Description>
+    <Description>Builds Markdown documents in .NET from a typed element tree. Renders CommonMark with GitHub Flavored Markdown extensions.</Description>
     <PackageTags>markdown; markdig; commonmark; gfm; builder; generator; documentation</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://tagbites.com/markdown/</PackageProjectUrl>
